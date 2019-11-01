@@ -28,5 +28,10 @@ bool isUndefined(const Line line);
 
 bool pointOnLine(const Line line, const Vector2D point);
 
+Vector2D getMidPoint(const Line& line);
+
+float distanceFromPoint(const Line& line, const Vector2D& point);
+Vector2D closestPointToPoint(const Line& line, const Vector2D& point);
+
 float totalDistance(const Line line);
 float totalDistance(const Vector2D start, const Vector2D end);

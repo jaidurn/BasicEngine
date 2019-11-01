@@ -81,3 +81,87 @@ void clamp(int& value, const int min, const int max)
 		value = max;
 	}
 }
+
+//=============================================================================
+// Function: void fMax(float&, const float, const float)
+// Description:
+// Sets the value to the larger value of the two.
+// Parameters:
+// float& value - The value to set.
+// const float a - The first value to compare.
+// const float b - The second value to compare.
+//=============================================================================
+void fMax(float& value, const float a, const float b)
+{
+	if (a < b)
+	{
+		value = b;
+	}
+	else
+	{
+		value = a;
+	}
+}
+
+//=============================================================================
+// Function: void iMax(int&, const int, const int)
+// Description:
+// Sets the value to the larger value of the two.
+// Parameters:
+// int& value - The value to set.
+// const int a - The first value to compare.
+// const int b - The second value to compare.
+//=============================================================================
+void iMax(int& value, const int a, const int b)
+{
+	if (a < b)
+	{
+		value = b;
+	}
+	else
+	{
+		value = a;
+	}
+}
+
+//=============================================================================
+// Function: void fMin(float& value, const float, const float)
+// Description:
+// Compares two values and sets the value to the smaller of the two.
+// Parameters:
+// float& value - The value to set.
+// const float a - The first value to compare.
+// const float b - The second value to compare.
+//=============================================================================
+void fMin(float& value, const float a, const float b)
+{
+	if (a < b)
+	{
+		value = a;
+	}
+	else
+	{
+		value = b;
+	}
+}
+
+//=============================================================================
+// Function: void iMin(int&, const int, const int)
+// Description:
+// Compares two values and sets the value to the smaller of the two.
+// Parameters:
+// int& value - The value to set.
+// const int a - The first value to compare.
+// const int b - The second value to compare.
+//=============================================================================
+void iMin(int& value, const int a, const int b)
+{
+	if (a < b)
+	{
+		value = a;
+	}
+	else
+	{
+		value = b;
+	}
+}

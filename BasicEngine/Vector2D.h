@@ -63,4 +63,7 @@ Vector2D operator-(const Vector2D& a, const Vector2D& b);
 Vector2D operator*(const Vector2D& a, const Vector2D& b);
 Vector2D operator/(const Vector2D& a, const Vector2D& b);
 
+bool operator==(const Vector2D& a, const Vector2D& b);
+bool operator!=(const Vector2D& a, const Vector2D& b);
+
 const int dotProduct(const Vector2D& a, const Vector2D& b);

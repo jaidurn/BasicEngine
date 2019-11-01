@@ -24,3 +24,9 @@ bool rectIntersectRect(const Rectangle& a,
 
 Vector2D intersectPoint(const Rectangle& rect,
 	const Line& line);
+
+Vector2D intersectPoint(const Rectangle& a,
+	const Rectangle& b);
+
+Vector2D overlapAmount(const Rectangle& a,
+	const Rectangle& b);

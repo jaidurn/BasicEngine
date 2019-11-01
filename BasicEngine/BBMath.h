@@ -12,3 +12,9 @@ int absoluteValue(const int value);
 
 void clamp(float& value, const float min, const float max);
 void clamp(int& value, const int min, const int max);
+
+void fMax(float& value, const float a, const float b);
+void iMax(int& value, const int a, const int b);
+
+void fMin(float& value, const float a, const float b);
+void iMin(int& value, const int a, const int b);

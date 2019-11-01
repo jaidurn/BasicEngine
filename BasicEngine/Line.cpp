@@ -265,6 +265,112 @@ bool pointOnLine(const Line line, const Vector2D point)
 }
 
 //=============================================================================
+// Function: Vector2D getMidPoint(const Line&)
+// Description:
+// Gets the midpoint of a line segment.
+// Parameters:
+// const Line& line - The line to get the mid point of.
+// Output:
+// Vector2D
+// Returns the midpoint position.
+//=============================================================================
+Vector2D getMidPoint(const Line& line)
+{
+	float xPoint = line.m_start.m_x + line.m_end.m_x;
+	float yPoint = line.m_start.m_y + line.m_end.m_y;
+
+	xPoint /= 2.0f;
+	yPoint /= 2.0f;
+
+	return Vector2D(xPoint, yPoint);
+}
+
+//=============================================================================
+// Function: float distanceFromPoint(const Line&,
+// const Vector2D&)
+// Description:
+// Gets the distance between a line and a point.
+// Parameters:
+// const Line& line - The line to use.
+// const Vector2D& point - The point to get the distance of.
+// Output:
+// float
+// Returns the distance between the point and the line.
+// Returns -1 on error.
+//=============================================================================
+float distanceFromPoint(const Line& line,
+	const Vector2D& point)
+{
+	return totalDistance(point, closestPointToPoint(line, point));
+}
+
+//=============================================================================
+// Function: Vector2D closestPointToPoint(const Line&,
+// const Vector2D&)
+// Description:
+// Gets the closest point on the line segment to the point.
+// Parameters:
+// const Line& line - The line to use.
+// const Vector2D& point - The point to get close to.
+// Output:
+// Vector2D
+// Returns the closest point.
+// Returns a negative vector on failure.
+//=============================================================================
+Vector2D closestPointToPoint(const Line& line,
+	const Vector2D& point)
+{
+	float a = line.m_end.m_y - line.m_start.m_y;
+	float b = line.m_end.m_x - line.m_start.m_x;
+	float c = line.m_end.m_x * line.m_start.m_y - line.m_start.m_x * line.m_end.m_y;
+
+	float xPoint = -1.0f;
+	float yPoint = -1.0f;
+
+	if (a == 0.0f && b != 0.0f)
+	{
+		xPoint = point.m_x;
+		yPoint = -c / b;
+	}
+	else if (a != 0.0f && b == 0.0f)
+	{
+		xPoint = -c / a;
+		yPoint = point.m_y;
+
+	}
+	else if (a != 0.0f && b != 0.0f)
+	{
+		xPoint = b * (b * point.m_x - a * point.m_y) - a * c;
+		xPoint /= (a * a) + (b * b);
+
+		yPoint = a * (-b * point.m_x + a * point.m_y) - b * c;
+		yPoint /= (a * a) + (b * b);
+	}
+
+	if (xPoint != -1.0f && yPoint != -1.0f)
+	{
+		Vector2D closestPoint(xPoint, yPoint);
+
+		if (!pointOnLine(line, closestPoint))
+		{
+			if (totalDistance(line.m_start, closestPoint) <
+				totalDistance(line.m_end, closestPoint))
+			{
+				xPoint = line.m_start.m_x;
+				yPoint = line.m_start.m_y;
+			}
+			else
+			{
+				xPoint = line.m_end.m_x;
+				yPoint = line.m_end.m_y;
+			}
+		}
+	}
+
+	return Vector2D(xPoint, yPoint);
+}
+
+//=============================================================================
 // Function: float totalDistance(const Line)
 // Description:
 // Calculates the distance between two points.

@@ -20,6 +20,16 @@ Vector2D operator/(const Vector2D& a, const Vector2D& b)
 	return Vector2D(a.m_x / b.m_x, a.m_y / b.m_y);
 }
 
+bool operator==(const Vector2D& a, const Vector2D& b)
+{
+	return(a.m_x == b.m_x && a.m_y == b.m_y);
+}
+
+bool operator!=(const Vector2D& a, const Vector2D& b)
+{
+	return(a.m_x != b.m_x || a.m_y != b.m_y);
+}
+
 //=============================================================================
 // Function: const int dotProduct(const Vector2D&, const Vector2D&)
 // Description:

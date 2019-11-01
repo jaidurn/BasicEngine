@@ -36,8 +36,12 @@ private:
 
 	const float m_FRICTION = 1.0f;
 
-	void handleMovement(CollisionBox* box,
+	void handleMovement(const int boxID,
+		CollisionBox* box,
 		const Vector2D& movement);
+
+	void moveOutside(CollisionBox* box,
+		CollisionBox* collision);
 
 	Vector2D applyFriction(const Vector2D& velocity,
 		const float delta) const;

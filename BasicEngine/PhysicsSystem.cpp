@@ -151,7 +151,7 @@ void PhysicsSystem::update(const float delta)
 
 				movement *= Vector2D(delta, delta);
 
-				handleMovement(box, movement);
+				handleMovement(mit->first, box, movement);
 
 				velocity->addVelocity(applyFriction(velocity->getDirection(), delta));
 			}
@@ -162,92 +162,134 @@ void PhysicsSystem::update(const float delta)
 }
 
 //=============================================================================
-// Function: void handleMovement(CollisionBox*,
+// Function: void handleMovement(const int,
+// CollisionBox*,
 // const Vector2D&)
 // Description:
 // Handles the movement for the collision box.
 // Parameters:
+// const int boxID - The id of the box to move.
 // CollisionBox* box - The box to move.
 // const Vector2D& movement - The movement to try to make.
 //=============================================================================
-void PhysicsSystem::handleMovement(CollisionBox* box,
+void PhysicsSystem::handleMovement(const int boxID,
+	CollisionBox* box,
 	const Vector2D& movement)
 {
-	Vector2D startPos = box->getPosition();
-	Vector2D endPos = startPos + movement;
-
-	std::vector<EntityData> collisionData =
-		m_collisionGrid->search(Line(startPos, endPos));
-
-	CollisionBox *collision = NULL;
-	CollisionBox *temp = NULL;
-
-	for (unsigned int i = 0; i < collisionData.size(); i++)
+	if (box)
 	{
-		temp = getCollisionBox(collisionData[i].m_id);
+		Vector2D startPos = box->getPosition();
+		Vector2D endPos = startPos + movement;
+		Line distance(startPos, endPos);
 
-		if (collision != NULL)
+		// Checks to see if there are any collisions on the move path.
+		std::vector<EntityData> lineSearch
+			= m_collisionGrid->search(distance);
+
+		CollisionBox *collision = NULL;
+		CollisionBox *temp = NULL;
+
+		Vector2D collisionPoint(-1.0f, -1.0f);
+
+		for (unsigned int i = 0; i < lineSearch.size(); i++)
 		{
-			if (temp->getSolid())
+			if (lineSearch[i].m_id != boxID)
 			{
-				if (totalDistance(temp->getPosition(), startPos) <
-					totalDistance(collision->getPosition(), startPos))
+				temp = getCollisionBox(lineSearch[i].m_id);
+
+				if (temp->getSolid())
 				{
-					collision = temp;
-				}
-			}
-		}
-		else
-		{
-			if (temp->getSolid())
-			{
-				collision = temp;
-			}
-		}
-	}
-
-	if (collision == NULL)
-	{
-		box->setPosition(endPos);
-
-		std::vector<EntityData> confirmData =
-			m_collisionGrid->search(box->getBox());
-
-		if (0 < confirmData.size())
-		{
-			box->setPosition(startPos);
-
-			for (unsigned int i = 0; i < confirmData.size(); i++)
-			{
-				if (collision != NULL)
-				{
-					if (temp->getSolid())
+					if (collision)
 					{
-						if (totalDistance(temp->getPosition(), endPos) <
-							totalDistance(collision->getPosition(), endPos))
+						Vector2D tempIntersect = intersectPoint(temp->getBox(), distance);
+
+						if (totalDistance(startPos, tempIntersect) < 
+							totalDistance(startPos, collisionPoint))
 						{
+							collisionPoint = tempIntersect;
 							collision = temp;
 						}
 					}
-				}
-				else
-				{
-					if (temp->getSolid())
+					else
 					{
 						collision = temp;
+						
+						collisionPoint = intersectPoint(collision->getBox(), distance);
 					}
 				}
 			}
+		}
 
-			if (collision)
+		// If a collision was made, move up to the collision point.
+		if (collision &&
+			0.0f <= collisionPoint.m_x &&
+			0.0f <= collisionPoint.m_y)
+		{
+			endPos = collisionPoint;
+		}
+
+		box->setPosition(endPos);
+
+		std::vector<EntityData> movedCollisions =
+			m_collisionGrid->search(box->getBox());
+
+		for (unsigned int i = 0; i < movedCollisions.size(); i++)
+		{
+			if (movedCollisions[i].m_id != boxID)
 			{
+				temp = getCollisionBox(movedCollisions[i].m_id);
 
+				if (temp && temp->getSolid())
+				{
+					moveOutside(box, temp);
+				}
 			}
 		}
+
+		endPos = box->getPosition();
+
+		box->setPosition(startPos);
+
+		m_collisionGrid->removeEntity(EntityData(boxID, box->getBox()));
+		
+		box->setPosition(endPos);
+
+		m_collisionGrid->addEntity(EntityData(boxID, box->getBox()));
 	}
-	else
+}
+
+//=============================================================================
+// Function: void moveOutside(CollisionBox*,
+// CollisionBox*,
+// const Vector2D&)
+// Description:
+// Moves the box outside of the box it's colliding with.
+// Parameters:
+// CollisionBox* box - The box to move.
+// CollisionBox* collision - The box it's inside.
+//=============================================================================
+void PhysicsSystem::moveOutside(CollisionBox* box,
+	CollisionBox* collision)
+{
+	if (box && collision)
 	{
-		Vector2D collisionPoint = intersectPoint(collision->getBox(), Line(startPos, endPos));
+		Vector2D updatedPosition = box->getPosition();
+		Vector2D overlap = overlapAmount(box->getBox(), collision->getBox());
+		// find the smallest move
+		// If you can just move the x, move the x
+		// If you can just move the y, move the y
+		// Otherwise, move both.
+		if (absoluteValue(overlap.m_x) <= 
+			absoluteValue(overlap.m_y))
+		{
+			updatedPosition.m_x += overlap.m_x;
+		}
+		else
+		{
+			updatedPosition.m_y += overlap.m_y;
+		}
+
+		box->setPosition(updatedPosition);
 	}
 }
 
