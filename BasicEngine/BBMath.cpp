@@ -1,0 +1,83 @@
+#include "BBMath.h"
+
+//=============================================================================
+// Function: float absoluteValue(const float)
+// Description:
+// An absolute value function.
+// Parameters:
+// const float value - The value to check.
+// Output:
+// float
+// Returns the absolute value.
+//=============================================================================
+float absoluteValue(const float value)
+{
+	if (value < 0.0f)
+	{
+		return value * -1.0f;
+	}
+
+	return value;
+}
+
+//=============================================================================
+// Function: int absoluteValue(const int)
+// Description:
+// An absolute value function.
+// Parameters:
+// const int value - The value to check.
+// Output:
+// int
+// Returns the absolute value.
+//=============================================================================
+int absoluteValue(const int value)
+{
+	if (value < 0)
+	{
+		return value * -1;
+	}
+
+	return value;
+}
+
+//=============================================================================
+// Function: void clamp(float&, const float, const float)
+// Description:
+// Clamps the value to make sure it's between the min and max.
+// Parameters:
+// float& value - The value to clamp.
+// const float min - The min value.
+// const float max - The max value.
+//=============================================================================
+void clamp(float& value, const float min, const float max)
+{
+	if (value < min)
+	{
+		value = min;
+	}
+	else if (max < value)
+	{
+		value = max;
+	}
+}
+
+//=============================================================================
+// Function: void clamp(int&, const int, const int)
+// Description:
+// Clamps the value to make sure it's between the min and max.
+// Parameters:
+// int& value - The value to clamp.
+// const int min - The min value.
+// const int max - The max value.
+//=============================================================================
+void clamp(int& value, const int min, const int max)
+{
+	if (value < min)
+	{
+		value = min;
+	}
+	else if (max < value)
+	{
+		value = max;
+	}
+}
