@@ -9,6 +9,7 @@
 //==========================================================================================
 #include "Rectangle.h"
 #include "Line.h"
+#include <vector>
 
 bool pointInRect(const Rectangle& rect,
 	const Vector2D& point);
@@ -30,3 +31,12 @@ Vector2D intersectPoint(const Rectangle& a,
 
 Vector2D overlapAmount(const Rectangle& a,
 	const Rectangle& b);
+
+std::vector<Vector2D> collisionPoints(const Rectangle& rect,
+	const Line& line);
+
+std::vector<Line> collisionLines(const Rectangle& rect,
+	const Vector2D& point);
+
+std::vector<Line> collisionLines(const Rectangle& rect,
+	const Line& line);

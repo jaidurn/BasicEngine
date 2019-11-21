@@ -165,3 +165,37 @@ void iMin(int& value, const int a, const int b)
 		value = b;
 	}
 }
+
+//=============================================================================
+// Function: float roundThousand(const float)
+// Description:
+// Rounds a float to the thousands place.
+// Parameters:
+// const float value - The value to round.
+// Output:
+// float
+// Returns the rounded float.
+//=============================================================================
+float roundThousand(const float value)
+{
+	int temp = (int)(value * 1000.0f + 0.5f);
+	float huh = temp / 1000.0f;
+	return (float)temp / 1000.0f;
+}
+
+//=============================================================================
+// Function: float roundHundred(const float)
+// Description:
+// Rounds a float to the hundredths place.
+// Parameters:
+// const float value - The value to round.
+// Output:
+// float
+// Returns the rounded float.
+//=============================================================================
+float roundHundred(const float value)
+{
+	int temp = (int)(value * 100.0f + 0.5f);
+
+	return (float)((double)temp / 100.0);
+}

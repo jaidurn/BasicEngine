@@ -63,7 +63,7 @@ bool lineInRect(const Rectangle& rect,
 	Line right(rect.getTopRight(), rect.getBottomRight());
 	Line left(rect.getTopLeft(), rect.getBottomLeft());
 
-	if (pointInRect(rect, line.m_start) &&
+	if (pointInRect(rect, line.m_start) ||
 		pointInRect(rect, line.m_end))
 	{
 		inside = true;
@@ -286,10 +286,22 @@ Vector2D intersectPoint(const Rectangle& rect, const Line& line)
 		{
 			Vector2D otherPoint = intersectPoint(line, right);
 
-			if (totalDistance(line.m_start, otherPoint) <
-				totalDistance(line.m_start, closestPoint))
+			if (totalDistance(line.m_start, closestPoint) <
+				totalDistance(line.m_start, otherPoint))
 			{
 				closestPoint = otherPoint;
+			}
+		}
+
+		if (closestPoint.m_x == 0.0f &&
+			closestPoint.m_y == 0.0f)
+		{
+			closestPoint = line.m_start;
+
+			if(totalDistance(line.m_end, rect.getCenter()) <
+				totalDistance(line.m_start, rect.getCenter()))
+			{
+				closestPoint = line.m_end;
 			}
 		}
 
@@ -572,4 +584,159 @@ Vector2D overlapAmount(const Rectangle& a,
 	}
 
 	return Vector2D(xOverlap, yOverlap);
+}
+
+//=============================================================================
+// Function: vector<Vector2D> collisionPoints(const Rectangle&,
+// const Line&)
+// Description:
+// Gets a vector of the points where a line collides with a
+// rectangle.
+// Parameters:
+// const Rectangle& rect - The rect to check.
+// const Line& line - The line to check.
+// Output:
+// vector<Vector2D>
+// If the line is completely inside the rectangle, the two points 
+// will be the start and end of the line.
+//
+// If the line crosses through the rectangle, there will be either
+// one or two points returned.
+//
+// If the line is on one of the rectangle lines, then it'll
+// return the two farthest points of collision.
+//
+// If there is no collision, there will be no points.
+//=============================================================================
+std::vector<Vector2D> collisionPoints(const Rectangle& rect,
+	const Line& line)
+{
+	std::vector<Vector2D> points;
+
+	Line top(rect.getTopLeft(), rect.getTopRight());
+	Line bottom(rect.getBottomLeft(), rect.getBottomRight());
+	Line left(rect.getTopLeft(), rect.getBottomLeft());
+	Line right(rect.getTopRight(), rect.getBottomRight());
+
+	if (linesIntersect(top, line))
+	{
+		points.emplace_back(intersectPoint(top, line));
+	}
+
+	if (linesIntersect(bottom, line))
+	{
+		points.emplace_back(intersectPoint(bottom, line));
+	}
+
+	if (linesIntersect(left, line))
+	{
+		points.emplace_back(intersectPoint(left, line));
+	}
+
+	if (linesIntersect(right, line))
+	{
+		points.emplace_back(intersectPoint(right, line));
+	}
+
+	return points;
+}
+
+//=============================================================================
+// Function: vector<Line> collisionLines(const Rectangle&,
+// const Vector2D&)
+// Description:
+// Gets a vector of all the lines the point is on of the rectangle.
+// Parameters:
+// const Rectangle& rect - The rect to check.
+// const Vector2D& point - The point to check.
+// Output:
+// vector<Line>
+// On success returns a vector with all the lines the point is on.
+// If there are no lines, returns an empty vector.
+//=============================================================================
+std::vector<Line> collisionLines(const Rectangle& rect,
+	const Vector2D& point)
+{
+	std::vector<Line> lines;
+
+	float workingX = roundf(point.m_x);
+	float workingY = roundf(point.m_y);
+
+	Vector2D workingPoint(workingX, workingY);
+
+	Line top(rect.getTopLeft(), rect.getTopRight());
+	Line right(rect.getTopRight(), rect.getBottomRight());
+	Line bottom(rect.getBottomRight(), rect.getBottomLeft());
+	Line left(rect.getBottomLeft(), rect.getTopLeft());
+
+	if (pointOnLine(top, workingPoint))
+	{
+		lines.push_back(top);
+	}
+
+	if (pointOnLine(right, workingPoint))
+	{
+		lines.push_back(right);
+	}
+
+	if (pointOnLine(bottom, workingPoint))
+	{
+		lines.push_back(bottom);
+	}
+
+	if (pointOnLine(left, workingPoint))
+	{
+		lines.push_back(left);
+	}
+
+	return lines;
+}
+
+//=============================================================================
+// Function: vector<Line> collisionLines(const Rectangle&,
+// const Line&)
+// Description:
+// Gets a vector of all the lines in the rect the line collides with.
+// Parameters:
+// const Rectangle& rect - The rect to check.
+// const Line& line - The line to check.
+// Output:
+// vector<Line>
+// Returns a vector with all the lines collided with.
+// Returns with a size of 0 if there are no collisions.
+//=============================================================================
+std::vector<Line> collisionLines(const Rectangle& rect,
+	const Line& line)
+{
+	std::vector<Line> lines;
+
+	if (lineInRect(rect, line))
+	{
+		Line top(rect.getTopRight(), rect.getTopLeft());
+		Line right(rect.getBottomRight(), rect.getTopRight());
+		Line bottom(rect.getBottomLeft(), rect.getBottomRight());
+		Line left(rect.getBottomLeft(), rect.getTopLeft());
+
+		if (linesIntersect(top, line))
+		{
+			lines.push_back(top);
+		}
+
+		if (linesIntersect(right, line))
+		{
+			lines.push_back(right);
+		}
+
+		if (linesIntersect(bottom, line))
+		{
+			lines.push_back(bottom);
+		}
+
+		if (linesIntersect(left, line))
+		{
+			lines.push_back(left);
+		}
+	}
+
+	return lines;
 }

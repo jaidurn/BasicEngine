@@ -41,10 +41,14 @@ private:
 		const Vector2D& movement);
 
 	void moveOutside(CollisionBox* box,
-		CollisionBox* collision);
+		CollisionBox* collision,
+		const Vector2D& movement);
 
 	Vector2D applyFriction(const Vector2D& velocity,
 		const float delta) const;
+
+	std::vector<Vector2D> getClosestPoints(const Rectangle& rect,
+		const Vector2D& point) const;
 
 	void cleanUp();
 };

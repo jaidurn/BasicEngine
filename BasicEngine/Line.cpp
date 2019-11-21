@@ -1,5 +1,6 @@
 #include "Line.h"
 #include <cmath>
+#include "BBMath.h"
 
 //=============================================================================
 // Function: bool linesIntersect(const Line, const Line)
@@ -16,17 +17,20 @@
 bool linesIntersect(const Line a, const Line b)
 {
 	bool intersect = false;
+
+	Line workingA = a;
+	Line workingB = b;
 	
-	if(isUndefined(a) && isUndefined(b))
+	if(isUndefined(workingA) && isUndefined(workingB))
 	{
 		// Make sure they have the same x
-		if (a.m_start.m_x == b.m_start.m_x)
+		if (workingA.m_start.m_x == workingB.m_start.m_x)
 		{
-			Vector2D intersection = intersectPoint(a, b);
+			Vector2D intersection = intersectPoint(workingA, workingB);
 
 			// Make sure they intersect
-			if (pointOnLine(a, intersection) && 
-				pointOnLine(b, intersection))
+			if (pointOnLine(workingA, intersection) && 
+				pointOnLine(workingB, intersection))
 			{
 				intersect = true;
 			}
@@ -34,31 +38,31 @@ bool linesIntersect(const Line a, const Line b)
 	}
 	else
 	{
-		if (isUndefined(a) || isUndefined(b))
+		if (isUndefined(workingA) || isUndefined(workingB))
 		{
-			Vector2D intersection = intersectPoint(a, b);
+			Vector2D intersection = intersectPoint(workingA, workingB);
 
-			if (pointOnLine(a, intersection) &&
-				pointOnLine(b, intersection))
+			if (pointOnLine(workingA, intersection) &&
+				pointOnLine(workingB, intersection))
 			{
 				intersect = true;
 			}
 		}
 		else
 		{
-			float slopeA = getSlope(a);
-			float slopeB = getSlope(b);
+			float slopeA = getSlope(workingA);
+			float slopeB = getSlope(workingB);
 
 			// If the lines have the same slope
 			if (slopeA == slopeB)
 			{
-				float interceptA = getIntercept(a);
-				float interceptB = getIntercept(b);
+				float interceptA = getIntercept(workingA);
+				float interceptB = getIntercept(workingB);
 				// And they aren't parallel
 				if (interceptA == interceptB)
 				{
 					// Make sure they actually touch.
-					if (pointOnLine(a, b.m_start) || pointOnLine(a, b.m_end))
+					if (pointOnLine(workingA, workingB.m_start) || pointOnLine(workingA, workingB.m_end))
 					{
 						intersect = true;
 					}
@@ -66,9 +70,9 @@ bool linesIntersect(const Line a, const Line b)
 			}
 			else
 			{
-				Vector2D intersection = intersectPoint(a, b);
+				Vector2D intersection = intersectPoint(workingA, workingB);
 
-				if (pointOnLine(a, intersection) && pointOnLine(b, intersection))
+				if (pointOnLine(workingA, intersection) && pointOnLine(workingB, intersection))
 				{
 					intersect = true;
 				}
@@ -97,70 +101,121 @@ Vector2D intersectPoint(const Line a, const Line b)
 	point.m_x = -1;
 	point.m_y = -1;
 
+	Line workingA = a;
+	Line workingB = b;
+
 	// If both lines are undefined.
-	if (isUndefined(a) && isUndefined(b))
+	if (isUndefined(workingA) && isUndefined(workingB))
 	{
-		if (a.m_start.m_x == b.m_start.m_x)
+		if (workingA.m_start.m_x == workingB.m_start.m_x)
 		{
-			if (pointOnLine(b, a.m_start))
+			if (pointOnLine(workingB, workingA.m_start))
 			{
-				point = a.m_start;
+				point = workingA.m_start;
 			}
-			else if (pointOnLine(b, a.m_end))
+			else if (pointOnLine(workingB, workingA.m_end))
 			{
-				point = a.m_end;
+				point = workingA.m_end;
 			}
-			else if (pointOnLine(a, b.m_start))
+			else if (pointOnLine(workingA, workingB.m_start))
 			{
-				point = b.m_start;
+				point = workingB.m_start;
 			}
-			else if (pointOnLine(a, b.m_end))
+			else if (pointOnLine(workingA, workingB.m_end))
 			{
-				point = b.m_end;
+				point = workingB.m_end;
 			}
 		}
 	}
 	else
 	{
-		if (isUndefined(a))
+		if (isUndefined(workingA))
 		{
-			float slopeB = getSlope(b);
-			float intersectB = getIntercept(b);
+			float slopeB = getSlope(workingB);
+			float intersectB = getIntercept(workingB);
 
-			float collideX = a.m_start.m_x;
-			float collideY = (slopeB * a.m_start.m_x) + intersectB;
+			float collideX = workingA.m_start.m_x;
+			float collideY = (slopeB * workingA.m_start.m_x) + intersectB;
 
 			point.m_x = collideX;
 			point.m_y = collideY;
+
+			if (isnan(point.m_x) || isnan(point.m_y))
+			{
+				int i = 0;
+			}
 		}
-		else if (isUndefined(b))
+		else if (isUndefined(workingB))
 		{
-			float slopeA = getSlope(a);
-			float intersectA = getIntercept(a);
+			float slopeA = getSlope(workingA);
+			float intersectA = getIntercept(workingA);
 
-			float collideX = b.m_start.m_x;
-			float collideY = (slopeA * b.m_start.m_x) + intersectA;
+			float collideX = workingB.m_start.m_x;
+			float collideY = (slopeA * workingB.m_start.m_x) + intersectA;
 
 			point.m_x = collideX;
 			point.m_y = collideY;
+
+			if (isnan(point.m_x) || isnan(point.m_y))
+			{
+				int i = 0;
+			}
 		}
 		else
 		{
-			float slopeA = getSlope(a);
-			float slopeB = getSlope(b);
+			float slopeA = getSlope(workingA);
+			float slopeB = getSlope(workingB);
 
-			float intersectA = getIntercept(a);
-			float intersectB = getIntercept(b);
+			float intersectA = getIntercept(workingA);
+			float intersectB = getIntercept(workingB);
 
-			float collideX = ((slopeA * a.m_start.m_x) - (slopeB * b.m_start.m_x) + (b.m_start.m_y - a.m_start.m_y)) / (slopeA - slopeB);
-			float collideY = (slopeA * (collideX - a.m_start.m_x) + a.m_start.m_y);
+			if (slopeA - slopeB == 0.0)
+			{
+				if (intersectA == intersectB)
+				{
+					if (pointOnLine(workingB, workingA.m_start))
+					{
+						point = workingA.m_start;
+					}
+					else if (pointOnLine(workingB, workingA.m_end))
+					{
+						point = workingA.m_end;
+					}
+					else if (pointOnLine(workingA, workingB.m_start))
+					{
+						point = workingB.m_start;
+					}
+					else if (pointOnLine(workingA, workingB.m_end))
+					{
+						point = workingB.m_end;
+					}
+					else
+					{
+						point = workingB.m_start;
+					}
+				}
+			}
+			else
+			{
+				float collideX = ((slopeA * workingA.m_start.m_x) - (slopeB * workingB.m_start.m_x) + (workingB.m_start.m_y - workingA.m_start.m_y)) / (slopeA - slopeB);
+				float collideY = (slopeA * (collideX - workingA.m_start.m_x) + workingA.m_start.m_y);
 
-			collideX = collideX;
-			collideY = collideY;
+				collideX = collideX;
+				collideY = collideY;
 
-			point.m_x = collideX;
-			point.m_y = collideY;
+				point.m_x = collideX;
+				point.m_y = collideY;
+			}
+			if (isnan(point.m_x) || isnan(point.m_y))
+			{
+				int i = 0;
+			}
 		}
+	}
+
+	if (isnan(point.m_x) || isnan(point.m_y))
+	{
+		int i = 0;
 	}
 
 	return point;
@@ -206,7 +261,7 @@ float getIntercept(const Line line)
 	float intercept = -1;
 	float slope = getSlope(line);
 
-	intercept = line.m_start.m_y - (line.m_start.m_x * slope);
+	intercept = roundf(line.m_start.m_y - (line.m_start.m_x * slope));
 
 	return intercept;
 }
@@ -250,13 +305,16 @@ bool pointOnLine(const Line line, const Vector2D point)
 {
 	bool onLine = false;
 
-	float startDistance = totalDistance(line.m_start, point);
-	float endDistance = totalDistance(line.m_end, point);
+	Line workingLine = line;
+	Vector2D workingPoint = point;
 
-	float realDist = totalDistance(line);
+	float startDistance = totalDistance(workingLine.m_start, workingPoint);
+	float endDistance = totalDistance(workingLine.m_end, workingPoint);
+
+	float realDist = totalDistance(workingLine);
 	float startAndEnd = startDistance + endDistance;
 
-	if (startDistance + endDistance == totalDistance(line))
+	if (abs(startAndEnd - realDist) < EPSILON)
 	{
 		onLine = true;
 	}
@@ -411,4 +469,19 @@ float totalDistance(const Vector2D start, const Vector2D end)
 	Line line(start, end);
 
 	return totalDistance(line);
+}
+
+//=============================================================================
+// Function: void roundLine(Line&)
+// Description:
+// Rounds the points of the line to be in pixel space.
+// Parameters:
+// Line& line - The line to round.
+//=============================================================================
+void roundLine(Line& line)
+{
+	line.m_start.m_x = roundf(line.m_start.m_x);
+	line.m_start.m_y = roundf(line.m_start.m_y);
+	line.m_end.m_x = roundf(line.m_end.m_x);
+	line.m_end.m_y = roundf(line.m_end.m_y);
 }

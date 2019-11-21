@@ -430,8 +430,8 @@ void Renderer::drawRect(const Rectangle& rect,
 	{
 		setDrawColor(color);
 
-		SDL_Rect dest{ (int)rect.getTopLeft().m_x,
-					   (int)rect.getTopLeft().m_y,
+		SDL_Rect dest{ (int)roundf(rect.getTopLeft().m_x),
+					   (int)roundf(rect.getTopLeft().m_y),
 					   rect.getWidth(),
 					   rect.getHeight() };
 
@@ -447,10 +447,23 @@ void Renderer::drawRect(const Rectangle& rect,
 			}
 			else
 			{
-				Line top(rect.getTopLeft(), rect.getTopRight());
-				Line bottom(rect.getBottomLeft(), rect.getBottomRight());
-				Line right(rect.getTopRight(), rect.getBottomRight());
-				Line left(rect.getTopLeft(), rect.getBottomLeft());
+				Rectangle temp = rect;
+				Vector2D roundCenter = temp.getCenter();
+
+				roundCenter.m_x = roundf(roundCenter.m_x);
+				roundCenter.m_y = roundf(roundCenter.m_y);
+				
+				temp.setCenter(roundCenter);
+
+				Line top(temp.getTopLeft(), temp.getTopRight());
+				Line bottom(temp.getBottomLeft(), temp.getBottomRight());
+				Line right(temp.getTopRight(), temp.getBottomRight());
+				Line left(temp.getTopLeft(), temp.getBottomLeft());
+
+				roundLine(top);
+				roundLine(bottom);
+				roundLine(right);
+				roundLine(left);
 
 				drawLine(top, color);
 				drawLine(bottom, color);
@@ -476,10 +489,10 @@ void Renderer::drawLine(const Line& line, const SDL_Color color)
 		setDrawColor(color);
 
 		if (SDL_RenderDrawLine(m_renderer,
-			(int)line.m_start.m_x,
-			(int)line.m_start.m_y,
-			(int)line.m_end.m_x,
-			(int)line.m_end.m_y) != 0)
+			(int)roundf(line.m_start.m_x),
+			(int)roundf(line.m_start.m_y),
+			(int)roundf(line.m_end.m_x),
+			(int)roundf(line.m_end.m_y)) != 0)
 		{
 			LogLocator::getLog().log("Failed to draw line!");
 

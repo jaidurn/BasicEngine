@@ -39,6 +39,9 @@ void Game::loop()
 
 	while (m_gameState != GAMESTATE_QUIT)
 	{
+		static Uint32 ticks = SDL_GetTicks();
+		ticks = SDL_GetTicks();
+
 		while (SDL_PollEvent(&e))
 		{
 			switch (e.type)
@@ -130,6 +133,60 @@ void Game::loop()
 					}
 					break;
 				}
+				case SDLK_q:
+				{
+					CollisionBox *box = m_physicsSystem->getCollisionBox(1);
+					Rectangle rect = box->getBox();
+
+					rect.setRotation(box->getBox().getRotation() - 2.0f);
+
+					box->setBox(rect);
+
+					break;
+				}
+				case SDLK_e:
+				{
+					CollisionBox *box = m_physicsSystem->getCollisionBox(1);
+					Rectangle rect = box->getBox();
+
+					rect.setRotation(box->getBox().getRotation() + 2.0f);
+
+					box->setBox(rect);
+
+					break;
+				}
+				case SDLK_w:
+				{
+					Velocity *vel = m_physicsSystem->getVelocity(1);
+
+					vel->addVelocity(Vector2D(0.0f, -1.0f));
+
+					break;
+				}
+				case SDLK_d:
+				{
+					Velocity *vel = m_physicsSystem->getVelocity(1);
+
+					vel->addVelocity(Vector2D(1.0f, 0.0f));
+
+					break;
+				}
+				case SDLK_s:
+				{
+					Velocity *vel = m_physicsSystem->getVelocity(1);
+
+					vel->addVelocity(Vector2D(0.0f, 1.0f));
+
+					break;
+				}
+				case SDLK_a:
+				{
+					Velocity *vel = m_physicsSystem->getVelocity(1);
+
+					vel->addVelocity(Vector2D(-1.0f, 0.0f));
+
+					break;
+				}
 				}
 
 				break;
@@ -137,15 +194,23 @@ void Game::loop()
 			}
 		}
 
-		static Uint32 ticks = SDL_GetTicks();
-		ticks = SDL_GetTicks();
+		static Uint32 renderTicks = 0;
+
 		renderClear();
-		update(0.0f);
+		update((float)renderTicks / 1000.0f);
+
+		CollisionBox *a = m_physicsSystem->getCollisionBox(0);
+		CollisionBox *b = m_physicsSystem->getCollisionBox(1);
+		Velocity *vel = m_physicsSystem->getVelocity(1);
+
+		m_renderer->drawRect(a->getBox(), SDL_Color{ 255, 0, 0, 255 });
+		m_renderer->drawRect(b->getBox(), SDL_Color{ 255, 0, 0, 255 });
+		m_renderer->drawLine(Line(b->getPosition(), b->getPosition() + vel->getDirection()), SDL_Color{ 0, 255, 0, 255 });
 
 		Uint32 logicTicks = SDL_GetTicks() - ticks;
 		LogLocator::getLog().log("Logic Ticks: " + std::to_string(logicTicks));
 		renderUpdate();
-		Uint32 renderTicks = SDL_GetTicks() - ticks - logicTicks;
+		renderTicks = SDL_GetTicks() - ticks - logicTicks;
 		LogLocator::getLog().log("Render Ticks: " + std::to_string(renderTicks));
 	}
 }
@@ -174,7 +239,7 @@ void Game::update(const float delta)
 {
 	if (m_gameState == GAMESTATE_RUNNING)
 	{
-
+		m_physicsSystem->update(delta);
 	}
 	else if(m_gameState == GAMESTATE_PAUSED)
 	{
@@ -230,11 +295,23 @@ bool Game::init(const string loadPath)
 					10,
 					Rectangle(Vector2D((float)(width / 2), (float)(height / 2)), width, height));
 
+			m_renderer = ResourceManager::getRenderer();
+
 			Rectangle size(Vector2D(1280.0f / 2.0f, 720.0f / 2.0f), 1280, 720);
 
 			Camera2D *camera = new Camera2D(size, size);
 
 			m_renderSystem->addCamera(camera);
+
+			Rectangle boxBase(Vector2D(100.0f, 100.0f), 32, 32);
+			Rectangle otherBox(Vector2D(200.0f, 100.0f), 64, 64);
+
+			otherBox.setRotation(34.0f);
+
+			m_physicsSystem->createCollisionBox(0, boxBase, true);
+			m_physicsSystem->createCollisionBox(1, otherBox, true);
+			m_physicsSystem->getVelocity(1)->addVelocity(Vector2D(-20.0f, 0.0f));
+
 
 			success = true;
 		}

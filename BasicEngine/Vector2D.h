@@ -61,9 +61,11 @@ struct Vector2D
 Vector2D operator+(const Vector2D& a, const Vector2D& b);
 Vector2D operator-(const Vector2D& a, const Vector2D& b);
 Vector2D operator*(const Vector2D& a, const Vector2D& b);
+Vector2D operator*(const Vector2D& point, const float amount);
 Vector2D operator/(const Vector2D& a, const Vector2D& b);
+Vector2D operator/(const Vector2D& point, const float amount);
 
 bool operator==(const Vector2D& a, const Vector2D& b);
 bool operator!=(const Vector2D& a, const Vector2D& b);
 
-const int dotProduct(const Vector2D& a, const Vector2D& b);
+const float dotProduct(const Vector2D& a, const Vector2D& b);

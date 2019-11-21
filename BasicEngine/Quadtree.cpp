@@ -84,19 +84,17 @@ std::vector<EntityData> Quadtree::search(const Rectangle& searchArea) const
 }
 
 //=============================================================================
-// Function: vector<EntityData> search(const Line&) const
+// Function: void search(const Line&, vector<EntityData>&) const
 // Description:
-// Searches for all entities that intersect the line and returns them.
+// Searches along the search line and adds any entities that collide
+// with it to the data vector.
 // Parameters:
-// const Line& 
-// Output:
-// vector<EntityData>
-// Returns a vector filled with the entity data of all entities found.
+// const Line& searchLine - The line to search along.
+// vector<EntityData>& data - The data vector to fill.
 //=============================================================================
-std::vector<EntityData> Quadtree::search(const Line& searchLine) const
+void Quadtree::search(const Line& searchLine,
+	std::unordered_map<int, EntityData>& data) const
 {
-	std::vector<EntityData> data;
-
 	if (lineInRect(m_bounds, searchLine))
 	{
 		if (m_children[0] != nullptr)
@@ -109,14 +107,15 @@ std::vector<EntityData> Quadtree::search(const Line& searchLine) const
 
 		for (unsigned int i = 0; i < m_data.size(); i++)
 		{
-			if (lineInRect(m_data[i].m_size, searchLine))
+			if (data.count(m_data[i].m_id) == 0)
 			{
-				data.emplace_back(m_data[i]);
+				if (lineInRect(m_data[i].m_size, searchLine))
+				{
+					data.insert(std::make_pair(m_data[i].m_id, m_data[i]));
+				}
 			}
 		}
 	}
-
-	return data;
 }
 
 //=============================================================================
@@ -282,38 +281,6 @@ void Quadtree::search(const Rectangle& searchArea,
 				{
 					data.emplace_back(m_data[i]);
 				}
-			}
-		}
-	}
-}
-
-//=============================================================================
-// Function: void search(const Line&, vector<EntityData>&) const
-// Description:
-// Searches along the search line and adds any entities that collide
-// with it to the data vector.
-// Parameters:
-// const Line& searchLine - The line to search along.
-// vector<EntityData>& data - The data vector to fill.
-//=============================================================================
-void Quadtree::search(const Line& searchLine,
-	std::vector<EntityData>& data) const
-{
-	if (lineInRect(m_bounds, searchLine))
-	{
-		if (m_children[0] != nullptr)
-		{
-			m_children[CHILD_NW]->search(searchLine, data);
-			m_children[CHILD_NE]->search(searchLine, data);
-			m_children[CHILD_SE]->search(searchLine, data);
-			m_children[CHILD_SW]->search(searchLine, data);
-		}
-
-		for (unsigned int i = 0; i < m_data.size(); i++)
-		{
-			if (lineInRect(m_data[i].m_size, searchLine))
-			{
-				data.emplace_back(m_data[i]);
 			}
 		}
 	}

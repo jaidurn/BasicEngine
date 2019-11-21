@@ -35,3 +35,5 @@ Vector2D closestPointToPoint(const Line& line, const Vector2D& point);
 
 float totalDistance(const Line line);
 float totalDistance(const Vector2D start, const Vector2D end);
+
+void roundLine(Line& line);

@@ -9,6 +9,7 @@
 #include "Rectangle.h"
 #include "Line.h"
 #include <vector>
+#include <unordered_map>
 #include <memory>
 
 class Renderer;
@@ -21,6 +22,14 @@ struct EntityData
 		m_size(size)
 	{
 		
+	}
+
+	EntityData(const EntityData& data)
+		:m_id(-1),
+		m_size(Vector2D(0.0f, 0.0f), 0, 0)
+	{
+		m_id = data.m_id;
+		m_size = data.m_size;
 	}
 
 	int m_id;
@@ -42,7 +51,9 @@ public:
 	const int getHeight() const;
 
 	std::vector<EntityData> search(const Rectangle& searchArea) const;
-	std::vector<EntityData> search(const Line& searchLine) const;
+	
+	void search(const Line& searchLine,
+		std::unordered_map<int, EntityData>& data) const;
 
 	void addEntity(const EntityData& entity);
 	void removeEntity(const EntityData& entity);
@@ -73,9 +84,6 @@ private:
 	void cleanUp();
 
 	void search(const Rectangle& searchArea,
-		std::vector<EntityData>& data) const;
-
-	void search(const Line& searchLine,
 		std::vector<EntityData>& data) const;
 
 	void getData(std::vector<EntityData>& data) const;
