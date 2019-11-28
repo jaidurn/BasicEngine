@@ -32,7 +32,20 @@ Vector2D operator/(const Vector2D& point, const float amount)
 
 bool operator==(const Vector2D& a, const Vector2D& b)
 {
-	return(a.m_x == b.m_x && a.m_y == b.m_y);
+	float xDiff = a.m_x - b.m_x;
+	float yDiff = a.m_y - b.m_y;
+
+	if (xDiff < 0.0f)
+	{
+		xDiff *= -1;
+	}
+	
+	if (yDiff < 0.0f)
+	{
+		yDiff *= -1;
+	}
+
+	return(xDiff <= 0.02 && yDiff <= 0.02);
 }
 
 bool operator!=(const Vector2D& a, const Vector2D& b)

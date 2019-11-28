@@ -1,4 +1,5 @@
 #include "Velocity.h"
+#include <cmath>
 
 Velocity::Velocity()
 	:m_direction(0.0f, 0.0f)
@@ -50,7 +51,7 @@ const Vector2D Velocity::getNormal() const
 //=============================================================================
 const float Velocity::getMagnitude() const
 {
-	return totalDistance(Vector2D(0.0f, 0.0f), m_direction);
+	return sqrtf(powf(m_direction.m_x, 2) + powf(m_direction.m_y, 2));
 }
 
 //=============================================================================

@@ -19,6 +19,8 @@ struct Line
 	Vector2D m_end;
 };
 
+bool operator==(const Line& a, const Line& b);
+
 bool linesIntersect(const Line a, const Line b);
 Vector2D intersectPoint(const Line a, const Line b);
 

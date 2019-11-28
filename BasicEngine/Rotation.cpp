@@ -61,7 +61,7 @@ float degreesToRadians(const float degrees)
 //=============================================================================
 float percentToDegrees(const float percent)
 {
-	float degrees = _CIRCLE_DEGREES * (percent / 100.0f);
+	float degrees = (_CIRCLE_DEGREES * percent) / 100.0f;
 	
 	return degrees;
 }
@@ -86,7 +86,7 @@ float angleToDegrees(const Vector2D& origin,
 	float xDiff = point.m_x - origin.m_x;
 	float yDiff = point.m_y - origin.m_y;
 
-	degrees = radiansToDegrees(atan2(xDiff, yDiff));
+	degrees = radiansToDegrees(atan2f(xDiff, yDiff));
 
 	if (degrees < 0)
 	{
@@ -119,11 +119,11 @@ Vector2D rotatePoint(const Vector2D& origin,
 	float degrees = percentToDegrees(percent);
 	float radians = degreesToRadians(degrees);
 
-	float radSine = sin(radians);
-	float radCosine = cos(radians);
+	float radSine = sinf(radians);
+	float radCosine = cosf(radians);
 
-	float rotatedX = round((tempX * radCosine) - (tempY * radSine));
-	float rotatedY = round((tempX * radSine) + (tempY * radCosine));
+	float rotatedX = (tempX * radCosine) - (tempY * radSine);
+	float rotatedY = (tempX * radSine) + (tempY * radCosine);
 
 	return Vector2D(origin.m_x + rotatedX, origin.m_y + rotatedY);
 }

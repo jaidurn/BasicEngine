@@ -187,6 +187,14 @@ void Game::loop()
 
 					break;
 				}
+				case SDLK_f:
+				{
+					Velocity *vel = m_physicsSystem->getVelocity(1);
+
+					vel->addVelocity(vel->getDirection() * -2.0f);
+
+					break;
+				}
 				}
 
 				break;
@@ -201,11 +209,16 @@ void Game::loop()
 
 		CollisionBox *a = m_physicsSystem->getCollisionBox(0);
 		CollisionBox *b = m_physicsSystem->getCollisionBox(1);
+		CollisionBox *c = m_physicsSystem->getCollisionBox(2);
+		CollisionBox *d = m_physicsSystem->getCollisionBox(3);
 		Velocity *vel = m_physicsSystem->getVelocity(1);
 
 		m_renderer->drawRect(a->getBox(), SDL_Color{ 255, 0, 0, 255 });
 		m_renderer->drawRect(b->getBox(), SDL_Color{ 255, 0, 0, 255 });
+		m_renderer->drawRect(c->getBox(), SDL_Color{ 255, 0, 0, 255 });
+		m_renderer->drawRect(d->getBox(), SDL_Color{ 255, 0, 0, 255 });
 		m_renderer->drawLine(Line(b->getPosition(), b->getPosition() + vel->getDirection()), SDL_Color{ 0, 255, 0, 255 });
+		m_renderer->drawLine(Line(b->getPosition(), getMidPoint(Line(b->getBox().getTopLeft(), b->getBox().getTopRight()))), SDL_Color{ 0, 0, 255, 255 });
 
 		Uint32 logicTicks = SDL_GetTicks() - ticks;
 		LogLocator::getLog().log("Logic Ticks: " + std::to_string(logicTicks));
@@ -310,6 +323,13 @@ bool Game::init(const string loadPath)
 
 			m_physicsSystem->createCollisionBox(0, boxBase, true);
 			m_physicsSystem->createCollisionBox(1, otherBox, true);
+
+			boxBase.setCenter(boxBase.getCenter() + Vector2D(0.0f, 31.0f));
+			m_physicsSystem->createCollisionBox(2, boxBase, true);
+			
+			boxBase.setCenter(boxBase.getCenter() + Vector2D(0.0f, -62.0f));
+			m_physicsSystem->createCollisionBox(3, boxBase, true);
+
 			m_physicsSystem->getVelocity(1)->addVelocity(Vector2D(-20.0f, 0.0f));
 
 

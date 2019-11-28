@@ -7,7 +7,7 @@
 // A header containing the common math functions I use.
 //==========================================================================================
 
-#define EPSILON 0.1f
+#define EPSILON 0.003f
 
 float absoluteValue(const float value);
 int absoluteValue(const int value);

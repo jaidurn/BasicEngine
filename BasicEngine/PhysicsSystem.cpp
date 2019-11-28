@@ -178,27 +178,16 @@ void PhysicsSystem::handleMovement(const int boxID,
 	if (box)
 	{
 		Vector2D startPos = box->getPosition();
+		Vector2D workingMovement = movement;
 
 		if (startPos.m_x == 0.0f && startPos.m_y == 0.0f)
 		{
 			int i = 0;
 		}
 
-		Vector2D startTopPos = box->getPosition();
-		startTopPos.m_y = box->getBox().getMinY();
-
-		Vector2D startBottomPos = box->getPosition();
-		startBottomPos.m_y = box->getBox().getMaxY();
-
 		Vector2D endPos = startPos + movement;
-		Vector2D endTopPos = startTopPos + movement;
-		Vector2D endBottomPos = startBottomPos + movement;
 
 		Line distance(startPos, endPos);
-		Line topDistance(startTopPos, endTopPos);
-		Line bottomDistance(startBottomPos, endBottomPos);
-
-		roundLine(distance);
 
 		// Checks to see if there are any collisions on the move path.
 		std::unordered_map<int, EntityData> lineSearch;
@@ -256,20 +245,214 @@ void PhysicsSystem::handleMovement(const int boxID,
 		std::vector<EntityData> movedCollisions =
 			m_collisionGrid->search(box->getBox());
 
+		std::vector<Vector2D> validMoves;
+
+		std::vector<Vector2D> moveChoices;
+
 		for (unsigned int i = 0; i < movedCollisions.size(); i++)
 		{
+			// Set up our first move attempt.
 			if (movedCollisions[i].m_id != boxID)
 			{
 				temp = getCollisionBox(movedCollisions[i].m_id);
 
-				if (temp && temp->getSolid())
+				if (validMoves.size() == 0)
 				{
-					if (movement.m_x < -100.0f)
-					{
-						int i = 0;
-					}
-					moveOutside(box, temp, movement);
+					moveChoices = moveOutside(box, temp, movement);
 				}
+				else
+				{
+					Vector2D lastValidMove = validMoves[validMoves.size() - 1];
+
+					if (lastValidMove.m_x != 0.0f ||
+						lastValidMove.m_y != 0.0f)
+					{
+						box->setPosition(box->getPosition() + lastValidMove);
+						moveChoices = moveOutside(box, temp, lastValidMove);
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				if (moveChoices.size() != 0)
+				{
+					Vector2D oldPosition = box->getPosition();
+
+					if (i < movedCollisions.size() - 1)
+					{
+						CollisionBox* nextCollision = NULL;
+
+						if (movedCollisions[i + 1].m_id == boxID)
+						{
+							if(i < movedCollisions.size() - 2)
+							{
+								nextCollision = getCollisionBox(movedCollisions[i + 2].m_id);
+							}
+						}
+						else
+						{
+							nextCollision = getCollisionBox(movedCollisions[i + 1].m_id);
+						}
+
+						if(nextCollision == NULL)
+						{
+							break;
+						}
+						else
+						{
+							Vector2D closestMove = moveChoices[0];
+							float closestDist = -1.0f;
+
+							for (unsigned int j = 0; j < moveChoices.size(); j++)
+							{
+								box->setPosition(box->getPosition() + moveChoices[j]);
+								moveOutside(box, nextCollision, moveChoices[j]);
+								
+								if (1 < moveChoices.size())
+								{
+									int hay = 0;
+								}
+
+								if (closestDist < 0.0f)
+								{
+									Vector2D tempClosest = box->getPosition() - startPos;
+									
+									closestDist = 
+										sqrtf(powf(tempClosest.m_x, 2) + powf(tempClosest.m_y, 2));
+									closestDist -= sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
+
+									closestDist = absoluteValue(closestDist);
+
+ 									closestMove = moveChoices[j];
+								}
+								else
+								{
+									Vector2D tempCompare = box->getPosition() - startPos;
+
+									float compareDist = 
+										sqrtf(powf(tempCompare.m_x, 2) + powf(tempCompare.m_y, 2));
+
+									compareDist -= sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
+									float movementDist = sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
+
+									compareDist = absoluteValue(compareDist);
+
+									if (compareDist < closestDist)
+									{
+										closestDist = compareDist;
+										closestMove = moveChoices[j];
+									}
+								}
+
+								box->setPosition(oldPosition);
+							}
+
+							validMoves.push_back(closestMove);
+							moveChoices.clear();
+						}
+					}
+					else
+					{
+						break;
+					}
+				}
+			}
+		}
+
+		// Test our final moves to make sure none of them collide with
+		// any thing.
+		// lets test the whole thing first
+		if (moveChoices.size() != 0)
+		{
+			Vector2D bestMove = moveChoices[0];
+			float bestDist = -1.0f;
+
+			Vector2D oldPosition = box->getPosition();
+
+			for (unsigned int i = 0; i < moveChoices.size(); i++)
+			{
+				Vector2D maxMove;
+				float maxDist = -1.0f;
+
+				box->setPosition(oldPosition + moveChoices[i]);
+
+				std::vector<EntityData> secondPass =
+					m_collisionGrid->search(box->getBox());
+
+				for (unsigned int j = 0; j < secondPass.size(); j++)
+				{
+					if (secondPass[j].m_id != boxID)
+					{
+						temp = getCollisionBox(secondPass[j].m_id);
+
+						if (temp && temp->getSolid())
+						{
+							moveOutside(box, temp, moveChoices[i]);
+
+							if (maxDist < 0.0f)
+							{
+								Vector2D tempMax = box->getPosition() - startPos;
+								
+								maxDist =
+									sqrtf(powf(tempMax.m_x, 2) + powf(tempMax.m_y, 2));
+
+								maxDist -= sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
+
+								maxDist = absoluteValue(maxDist);
+
+								maxMove = box->getPosition();
+							}
+							else
+							{
+								Vector2D tempCompare = box->getPosition() - startPos;
+
+								float compareDist =
+									sqrtf(powf(tempCompare.m_x, 2) + powf(tempCompare.m_y, 2));
+
+								compareDist -=
+									sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
+
+								compareDist = absoluteValue(compareDist);
+
+								if (maxDist < compareDist)
+								{
+									maxDist = compareDist;
+									maxMove = box->getPosition();
+								}
+							}
+
+							box->setPosition(oldPosition);
+						}
+					}
+				}
+
+				if (0.0f < maxDist)
+				{
+					if (bestDist < 0.0f)
+					{
+						bestMove = maxMove;
+						bestDist = maxDist;
+					}
+					else
+					{
+						if (maxDist < bestDist)
+						{
+							bestMove = maxMove;
+							bestDist = maxDist;
+						}
+					}
+				}
+			}
+
+			if (0.0f <= bestDist)
+			{
+				box->setPosition(bestMove);
+			}
+			else
+			{
+				box->setPosition(box->getPosition() + bestMove);
 			}
 		}
 
@@ -279,7 +462,7 @@ void PhysicsSystem::handleMovement(const int boxID,
 
 		m_collisionGrid->removeEntity(EntityData(boxID, box->getBox()));
 		
-		if (endPos.m_x < 0.0f)
+		if (endPos.m_x == 0.0f)
 		{
 			int i = 0;
 		}
@@ -290,334 +473,701 @@ void PhysicsSystem::handleMovement(const int boxID,
 	}
 }
 
+std::vector<Vector2D> PhysicsSystem::moveToCollision(CollisionBox* box,
+	CollisionBox* collision,
+	const Vector2D& movement)
+{
+	std::vector<Vector2D> suggestedMoves;
+
+	if (box && collision)
+	{
+		Rectangle boxRect = box->getBox();
+		Rectangle collideRect = collision->getBox();
+
+		Vector2D boxStartPoint = boxRect.getCenter() - movement;
+		Vector2D boxEndPoint = boxRect.getCenter();
+
+		// Make our movement bigger.
+		Vector2D moveMod = movement * 10000.0f;
+		Vector2D moveNormal = movement / sqrtf(movement.m_x * movement.m_x + movement.m_y * movement.m_y);
+		
+		// TODO: Test this and make sure it works.
+		// It doesn't.
+		// Find a way to figure out which plane is the colliding plane
+		// and only use that information if we're going away from it.
+		if (boxMovingAway(*box, *collision, movement))
+		{
+			moveMod.m_x *= -1.0f;
+			moveNormal.m_x *= -1.0f;
+
+			moveMod.m_y *= -1.0f;
+			moveNormal.m_y *= -1.0f;
+		}
+
+		// Get the closest points in the movement direction.
+		std::vector<Vector2D> boxClosestPoints =
+			getClosestPoints(boxRect, boxRect.getCenter() + moveMod);
+
+		Line boxRayA(boxClosestPoints[0], boxClosestPoints[0] - moveMod);
+		Line boxRayB(boxClosestPoints[1], boxClosestPoints[1] - moveMod);
+
+		std::vector<Vector2D> boxCollisionsA = 
+			collisionPoints(collideRect, boxRayA);
+
+		std::vector<Vector2D> boxCollisionsB = 
+			collisionPoints(collideRect, boxRayB);
+
+		std::vector<Vector2D> wallNormals;
+
+		if (boxCollisionsA.size() != 0 ||
+			boxCollisionsB.size() != 0)
+		{
+			Vector2D startPoint;
+			Vector2D farthestPoint(-1.0f, -1.0f);
+			float farthestDist = -1.0f;
+
+			//Find the farthest point to move back to.
+			if (boxCollisionsA.size() != 0)
+			{
+				startPoint = boxRayA.m_start;
+
+				for (unsigned int i = 0; i < boxCollisionsA.size(); i++)
+				{
+					if (farthestDist == -1.0f)
+					{
+						farthestPoint = boxCollisionsA[i];
+						farthestDist = totalDistance(startPoint, farthestPoint);
+					}
+					else
+					{
+						if (farthestDist <
+							totalDistance(startPoint, boxCollisionsA[i]))
+						{
+							farthestPoint = boxCollisionsA[i];
+							farthestDist = totalDistance(startPoint, farthestPoint);
+						}
+					}
+				}
+			}
+
+			if (boxCollisionsB.size() != 0)
+			{
+				for (unsigned int i = 0; i < boxCollisionsB.size(); i++)
+				{
+					if (farthestDist == -1.0f)
+					{
+						startPoint = boxRayB.m_start;
+						farthestPoint = boxCollisionsB[i];
+						farthestDist = totalDistance(startPoint, farthestPoint);
+					}
+					else
+					{
+						if (farthestDist <
+							totalDistance(startPoint, boxCollisionsB[i]))
+						{
+							farthestPoint = boxCollisionsB[i];
+							farthestDist = totalDistance(startPoint, farthestPoint);
+						}
+					}
+				}
+			}
+
+			// Move back to the farthest point.
+			Vector2D moveDistance = farthestPoint - startPoint;
+			Vector2D correctionAmount =
+				moveDistance / sqrtf(moveDistance.m_x * moveDistance.m_x + moveDistance.m_y * moveDistance.m_y);
+
+			moveDistance += moveDistance / 10.0f;
+
+			boxRect.setCenter(boxRect.getCenter() + moveDistance);
+			box->setPosition(boxRect.getCenter());
+
+			// Get the current wall normal.
+			std::vector<Line> collideLines = 
+				collisionLines(collideRect, farthestPoint);
+
+			if (collideLines.size() != 0)
+			{
+				if (collideLines.size() == 2)
+				{
+					Vector2D diagonalNormal = farthestPoint - collideRect.getCenter();
+
+					float magnitudes = sqrtf(powf(diagonalNormal.m_x, 2) + powf(diagonalNormal.m_y, 2));
+					magnitudes *= sqrtf(powf(moveNormal.m_x, 2) + powf(moveNormal.m_y, 2));
+					diagonalNormal =
+						diagonalNormal / magnitudes;	
+					
+					// Check to see if moving diagonally is good.
+
+					if (-1.0f < dotProduct(moveNormal, diagonalNormal))
+					{
+						float dp = dotProduct(moveNormal, diagonalNormal);
+
+						diagonalNormal.m_x = farthestPoint.m_y - collideRect.getCenter().m_y;
+						diagonalNormal.m_y = -(farthestPoint.m_x - collideRect.getCenter().m_x);
+
+						wallNormals.push_back(diagonalNormal);
+					}
+
+					wallNormals.push_back(Vector2D(collideLines[0].m_end - collideLines[0].m_start));
+					wallNormals.push_back(Vector2D(collideLines[1].m_end - collideLines[1].m_start));
+				}
+				else
+				{
+					wallNormals.push_back(Vector2D(collideLines[0].m_end - collideLines[0].m_start));
+				}
+			}
+		}
+
+		// Finish pushing the box outside.
+		if (rectIntersectRect(boxRect, collideRect))
+		{
+			std::vector<Vector2D> collideClosestPoints =
+				getClosestPoints(collideRect, collideRect.getCenter() - moveMod);
+
+			Line collideRayA(collideClosestPoints[0], collideClosestPoints[0] + moveMod);
+			Line collideRayB(collideClosestPoints[1], collideClosestPoints[1] + moveMod);
+
+			std::vector<Vector2D> collidePointsA = collisionPoints(boxRect, collideRayA);
+			std::vector<Vector2D> collidePointsB = collisionPoints(boxRect, collideRayB);
+
+			if (collidePointsA.size() != 0 ||
+				collidePointsB.size() != 0)
+			{
+				Vector2D startPoint;
+				Vector2D farthestPoint(-1.0f, -1.0f);
+				float farthestDist = -1.0f;
+
+				for (unsigned int i = 0; i < collidePointsA.size(); i++)
+				{
+					if (farthestDist == -1.0f)
+					{
+						startPoint = collideRayA.m_start;
+						farthestPoint = collidePointsA[i];
+						farthestDist = totalDistance(startPoint, farthestPoint);
+					}
+					else if (farthestDist <
+							 totalDistance(startPoint, collidePointsA[i]))
+					{
+						farthestPoint = collidePointsA[i];
+						farthestDist = totalDistance(startPoint, farthestPoint);
+					}
+				}
+
+				for (unsigned int i = 0; i < collidePointsB.size(); i++)
+				{
+					if (farthestDist == -1.0f)
+					{
+						startPoint = collideRayB.m_start;
+						farthestPoint = collidePointsB[i];
+						farthestDist = totalDistance(startPoint, farthestPoint);
+					}
+					else if (farthestDist <
+							 totalDistance(startPoint, collidePointsB[i]))
+					{
+						farthestPoint = collidePointsB[i];
+						farthestDist = totalDistance(startPoint, farthestPoint);
+					}
+				}
+
+				Vector2D moveDistance = startPoint - farthestPoint;
+				Vector2D correctionAmount =
+					moveDistance / sqrtf(moveDistance.m_x * moveDistance.m_x + moveDistance.m_y * moveDistance.m_y);
+
+				moveDistance += correctionAmount / 10.0f;
+
+				boxRect.setCenter(boxRect.getCenter() + moveDistance);
+				box->setPosition(boxRect.getCenter());
+
+				// Get the wall normal at this point.
+				std::vector<Line> collideLines = collisionLines(collideRect, startPoint);
+				
+				if (collideLines.size() == 2)
+				{
+					std::vector<Line> boxCollideLines = collisionLines(boxRect, farthestPoint + moveDistance);
+
+					if (boxCollideLines.size() == 2)
+					{
+						Vector2D diagonalNormal = boxRect.getCenter() - startPoint;
+						float magnitudes = sqrtf(powf(diagonalNormal.m_x, 2) + powf(diagonalNormal.m_y, 2));
+						magnitudes *= sqrtf(powf(moveNormal.m_x, 2) + powf(moveNormal.m_y, 2));
+						diagonalNormal =
+							diagonalNormal / magnitudes;
+
+						// Check to see if moving diagonally is good.
+						if (-1.0f < dotProduct(moveNormal, diagonalNormal))
+						{
+							float dp = dotProduct(moveNormal, diagonalNormal);
+
+							diagonalNormal.m_x = boxRect.getCenter().m_y - startPoint.m_y;
+							diagonalNormal.m_y = -(boxRect.getCenter().m_x - startPoint.m_x);
+
+							wallNormals.push_back(diagonalNormal);
+						}
+					}
+					else
+					{
+						wallNormals.push_back(boxCollideLines[0].m_end - boxCollideLines[0].m_start);
+					}
+
+					wallNormals.push_back(Vector2D(collideLines[0].m_end - collideLines[0].m_start));
+					wallNormals.push_back(Vector2D(collideLines[1].m_end - collideLines[1].m_start));
+				}
+				else if (collideLines.size() != 0)
+				{
+					wallNormals.push_back(Vector2D(collideLines[0].m_end - collideLines[0].m_start));
+				}
+			}
+		}
+
+		// Project the remaining movement along the wall normal.
+		if (wallNormals.size() != 0)
+		{
+			Vector2D prevPosition = box->getPosition();
+			Vector2D leftOverMovement = boxEndPoint - prevPosition;
+
+			for (unsigned int i = 0; i < wallNormals.size(); i++)
+			{
+				float dp = dotProduct(leftOverMovement, wallNormals[i]);
+
+				Vector2D moveProposal(wallNormals[i] * (dp / (powf(wallNormals[i].m_x, 2) + powf(wallNormals[i].m_y, 2))));
+
+				box->setPosition(prevPosition + moveProposal);
+			
+				if (!rectIntersectRect(box->getBox(), collideRect))
+				{
+					suggestedMoves.push_back(moveProposal);
+				}
+
+				box->setPosition(prevPosition);
+			}
+		}
+	}
+
+	return suggestedMoves;
+}
+
 //=============================================================================
 // Function: void moveOutside(CollisionBox*,
 // CollisionBox*,
-// const Vector2D&)
+// Vector2D&)
 // Description:
 // Moves the box outside of the box it's colliding with.
 // Parameters:
 // CollisionBox* box - The box to move.
 // CollisionBox* collision - The box it's inside.
+// Vector2D& movement - The movement being attempted.
 //=============================================================================
-void PhysicsSystem::moveOutside(CollisionBox* box,
+std::vector<Vector2D> PhysicsSystem::moveOutside(CollisionBox* box,
 	CollisionBox* collision,
 	const Vector2D& movement)
 {
-	if (box && collision)
+	std::vector<Vector2D> suggestedMoves;
+	std::vector<Vector2D> wallNormals;
+
+	Rectangle boxRect = box->getBox();
+	Rectangle collideRect = collision->getBox();
+
+	Vector2D moveNormal = movement / sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
+	Vector2D moveMod = moveNormal * (boxRect.getWidth() / 2);
+
+	Vector2D endGoal = boxRect.getCenter();
+
+	std::vector<Vector2D> boxClosestPoints = getClosestPoints(boxRect, collideRect.getCenter());
+
+	// Check to see if any of the points are inside the collide box.
+	for (unsigned int i = 0; i < boxClosestPoints.size(); i++)
 	{
-		Vector2D updatedPosition = box->getPosition();
-
-		Rectangle boxRect = box->getBox();
-		Rectangle collideRect = collision->getBox();
-
-		// Get the corners of rect a that are
-		// in the movement direction.
-
-		std::vector<Vector2D> aClosestPoints;
-
-		aClosestPoints = getClosestPoints(boxRect, box->getPosition() + (movement));
-
-		// A REALLY big mod, so the lines are long.
-		Vector2D moveMod = movement * 10000.0f;
-		Vector2D moveNormal = movement / sqrt(movement.m_x * movement.m_x + movement.m_y * movement.m_y);
-
-		if (aClosestPoints[0].m_x == 0.0f &&
-			aClosestPoints[0].m_y == 0.0f)
+		// If we find a point inside the collide box, find the lines it collides with.
+		if (pointInRect(collideRect, boxClosestPoints[i]))
 		{
-			int i = 0;
-		}
+			std::vector<Line> collideLines;
 
-		if (dotProduct(collideRect.getCenter() - boxRect.getCenter(), movement) < 0.0f)
-		{
-			moveMod = moveMod * -1.0f;
-		}
+			std::vector<Line> boxPointLines = getPointLines(boxRect, boxClosestPoints[i]);
 
-		// Draw a line and find the farthest collision point on the line.
-		Line firstPointRay(aClosestPoints[0], aClosestPoints[0] - moveMod);
-		Line secondPointRay(aClosestPoints[1], aClosestPoints[1] - moveMod);
-
-		std::vector<Vector2D> firstCollisions = collisionPoints(collideRect, firstPointRay);
-		std::vector<Vector2D> secondCollisions = collisionPoints(collideRect, secondPointRay);
-
-		Vector2D wallNormal;
-		
-		// Handle the first set of collisions.
-		if (firstCollisions.size() != 0 ||
-			secondCollisions.size() != 0)
-		{
-			Vector2D startingPoint;
-			Vector2D farthestPoint(-1.0f, -1.0f);
-			float farthestDist = -1.0f;
-
-			if (firstCollisions.size() != 0)
+			if (boxPointLines.size() != 0)
 			{
-				startingPoint = firstPointRay.m_start;
-				farthestPoint = firstCollisions[0];
-				farthestDist = totalDistance(firstPointRay.m_start, farthestPoint);
-
-				for (unsigned int i = 0; i < firstCollisions.size(); i++)
+				for (unsigned int j = 0; j < boxPointLines.size(); j++)
 				{
-					if (farthestDist <
-						totalDistance(firstPointRay.m_start, firstCollisions[i]))
+					// Find the lines the lines collide with.
+					float slope = 0.0f;
+					float lengthMod = 100.0f;
+					float lineLength = totalDistance(boxPointLines[j]);
+					Line longerLine = boxPointLines[j];
+
+					if (boxClosestPoints[i] == longerLine.m_end)
 					{
-						farthestPoint = firstCollisions[i];
-						farthestDist = totalDistance(firstPointRay.m_start, farthestPoint);
+						longerLine.m_end = longerLine.m_start;
+						longerLine.m_start = boxPointLines[j].m_end;
 					}
+
+					// Create a long version of the lines.
+					longerLine.m_end.m_x =
+						longerLine.m_end.m_x + (longerLine.m_end.m_x - longerLine.m_start.m_x) / lineLength * lengthMod;
+					longerLine.m_end.m_y =
+						longerLine.m_end.m_y + (longerLine.m_end.m_y - longerLine.m_start.m_y) / lineLength * lengthMod;
+
+					collisionLines(collideLines, collideRect, longerLine);
 				}
-			}
-
-			if (secondCollisions.size() != 0)
-			{
-				if (farthestPoint.m_x == -1.0f &&
-					farthestPoint.m_y == -1.0f)
-				{
-					farthestPoint = secondCollisions[0];
-					farthestDist = totalDistance(secondPointRay.m_start, farthestPoint);
-					startingPoint = secondPointRay.m_start;
-				}
-
-				for (unsigned int i = 0; i < secondCollisions.size(); i++)
-				{
-					if (farthestDist <
-						totalDistance(secondPointRay.m_start, secondCollisions[i]))
-					{
-						startingPoint = secondPointRay.m_start;
-						farthestPoint = secondCollisions[i];
-						farthestDist = totalDistance(secondPointRay.m_start, farthestPoint);
-					}
-				}
-			}
-
-//			farthestPoint.m_x = roundf(farthestPoint.m_x);
-//			farthestPoint.m_y = roundf(farthestPoint.m_y);
-
-			// Now that we have the furthest point, we need to move back that amount
-			// Add in the one step further back, so no collisions are happening.
-			Vector2D moveAmount = farthestPoint - startingPoint - (movement * -0.001f);
-
-			Vector2D rounded = box->getPosition() + moveAmount;
-
-			rounded.m_x = roundf(rounded.m_x);
-			rounded.m_y = roundf(rounded.m_y);
-
-			box->setPosition(rounded);
-
-			if (isnan(box->getPosition().m_x))
-			{
-				int i = 0;
-			}
-
-			std::vector<Line> topLines = collisionLines(collideRect, firstPointRay);
-			std::vector<Line> bottomLines = collisionLines(collideRect, secondPointRay);
-
-			Vector2D wallNormal;
-
-			if (topLines.size() != 0 && bottomLines.size() != 0)
-			{
-				for (unsigned int i = 0; i < topLines.size(); i++)
-				{
-					for (unsigned int j = 0; j < bottomLines.size(); j++)
-					{
-						if (topLines[i].m_start == bottomLines[j].m_start &&
-							topLines[i].m_end == bottomLines[j].m_end)
-						{
-							wallNormal = topLines[i].m_end - topLines[i].m_start;
-							break;
-						}
-					}
-				}
-			}
-
-			if (wallNormal.m_x == 0.0f &&
-				wallNormal.m_y == 0.0f)
-			{
-				std::vector<Line> collideLines = collisionLines(collideRect, farthestPoint);
 
 				if (collideLines.size() != 0)
 				{
+					Line moveLine(boxClosestPoints[i], boxClosestPoints[i] - moveMod);
+
+					Vector2D moveAmount(0.0f, 0.0f);
+
+					bool collides = false;
+
+					for (unsigned int j = 0; j < collideLines.size(); j++)
+					{
+						if (linesIntersect(collideLines[j], moveLine))
+						{
+							collides = true;
+
+							break;
+						}
+					}
+
+					if (!collides)
+					{
+						moveLine.m_end = moveLine.m_start + moveMod;
+					}
+
 					if (collideLines.size() == 2)
 					{
-						// Use the center as the normal i guess.
-						if (dotProduct(Vector2D(collideLines[0].m_end - collideLines[0].m_start), movement) == 0.0f)
+						if (linesIntersect(collideLines[0], moveLine))
 						{
-							wallNormal.m_x =
-								(collideLines[0].m_end.m_x - collideLines[0].m_start.m_x);
-							wallNormal.m_y =
-								(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
+							if (!linesIntersect(collideLines[1], moveLine))
+							{
+								moveAmount = intersectPoint(collideLines[0], moveLine) - moveLine.m_start;
+								wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
+								wallNormals.push_back(collideLines[1].m_end - collideLines[1].m_start);
+							}
+							else
+							{
+								float distLineA = totalDistance(intersectPoint(collideLines[0], moveLine), moveLine.m_start);
+								float distLineB = totalDistance(intersectPoint(collideLines[0], moveLine), moveLine.m_start);
+
+								if(distLineA < distLineB)
+								{
+									moveAmount = intersectPoint(collideLines[0], moveLine) - moveLine.m_start;
+									wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
+								}
+								else if (distLineA == distLineB)
+								{
+									moveAmount = intersectPoint(collideLines[0], moveLine) - moveLine.m_start;
+
+									wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
+									wallNormals.push_back(collideLines[1].m_end - collideLines[1].m_start);
+									wallNormals.push_back(collideRect.getCenter() - intersectPoint(collideLines[0], moveLine));
+								}
+								else
+								{
+									moveAmount = intersectPoint(collideLines[1], moveLine) - moveLine.m_start;
+									wallNormals.push_back(collideLines[1].m_end - collideLines[1].m_start);
+								}
+
+							}
 						}
-						else if (dotProduct(Vector2D(collideLines[1].m_end - collideLines[1].m_start), movement) == 0.0f)
+						else if (linesIntersect(collideLines[1], moveLine))
 						{
-							wallNormal.m_x =
-								(collideLines[1].m_end.m_x - collideLines[1].m_start.m_x);
-							wallNormal.m_y =
-								(collideLines[1].m_end.m_y - collideLines[1].m_start.m_y);
+							moveAmount = intersectPoint(collideLines[1], moveLine) - moveLine.m_start;
+
+							wallNormals.push_back(collideLines[1].m_end - collideLines[1].m_start);
+							wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
 						}
 						else
 						{
-							wallNormal.m_x = farthestPoint.m_y - collideRect.getCenter().m_y;
-							wallNormal.m_y = -(farthestPoint.m_x - collideRect.getCenter().m_x);
+							int yee = 0;
 						}
 					}
-					else
+					else 
 					{
-						wallNormal.m_x =
-							(collideLines[0].m_end.m_x - collideLines[0].m_start.m_x);
-						wallNormal.m_y =
-							(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
-					}
-				}
-			}
-
-			if (wallNormal.m_x != 0.0f ||
-				wallNormal.m_y != 0.0f)
-			{
-				Vector2D leftOverMovement = updatedPosition - box->getPosition();
-				Vector2D currentPosition = box->getPosition();
-
-				float dp = dotProduct(leftOverMovement, wallNormal);
-				Vector2D slideMove = wallNormal * (dp / (wallNormal.m_x * wallNormal.m_x + wallNormal.m_y * wallNormal.m_y));
-
-				box->setPosition(currentPosition + slideMove);
-
-				wallNormal.m_x = 0.0f;
-				wallNormal.m_y = 0.0f;
-
-				if (isnan(box->getPosition().m_x))
-				{
-					int i = 0;
-				}
-			}
-		}
-
-		// If the first pass didn't solve the problem,
-		// Try again with the second rect.
-		if (rectIntersectRect(boxRect, collideRect))
-		{
-			// Look from the other rect's angle.
-			std::vector<Vector2D> bClosestPoints = getClosestPoints(collideRect, collideRect.getCenter() - movement);
-
-			// Draw lines and find the furthest collision point.
-			Line bFirstRay(bClosestPoints[0], bClosestPoints[0] + moveMod);
-			Line bSecondRay(bClosestPoints[1], bClosestPoints[1] + moveMod);
-
-			std::vector<Vector2D> bFirstCol = collisionPoints(boxRect, bFirstRay);
-			std::vector<Vector2D> bSecondCol = collisionPoints(boxRect, bSecondRay);
-
-			Vector2D startPoint;
-			Vector2D farthestPoint;
-			float farthestDist = -1.0f;
-
-			if (bFirstCol.size() != 0)
-			{
-				startPoint = bFirstRay.m_start;
-				farthestPoint = bFirstCol[0];
-				farthestDist =
-					totalDistance(bFirstRay.m_start, farthestPoint);
-
-				for (unsigned int i = 1; i < bFirstCol.size(); i++)
-				{
-					if (farthestDist <
-						totalDistance(startPoint, bFirstCol[i]))
-					{
-						farthestPoint = bFirstCol[i];
-						farthestDist = totalDistance(startPoint, farthestPoint);
-					}
-				}
-			}
-
-			if (bSecondCol.size() != 0)
-			{
-				if (farthestDist < 0)
-				{
-					startPoint = bSecondRay.m_start;
-					farthestPoint = bSecondCol[0];
-					farthestDist = totalDistance(startPoint, farthestPoint);
-				}
-
-				for (unsigned int i = 0; i < bSecondCol.size(); i++)
-				{
-					if (farthestDist <
-						totalDistance(bSecondRay.m_start, bSecondCol[i]))
-					{
-						farthestPoint = bSecondCol[i];
-						startPoint = bSecondRay.m_start;
-						farthestDist = totalDistance(startPoint, farthestPoint);
-					}
-				}
-			}
-
-			if (0.0f < farthestDist)
-			{
-				// Move an extra step out.
-				//farthestPoint.m_x = roundf(farthestPoint.m_x);
-				//farthestPoint.m_y = roundf(farthestPoint.m_y);
-
-				Vector2D moveAmount = startPoint - farthestPoint + (movement * -0.001f);
-
-				Vector2D rounded = box->getPosition() + moveAmount;
-
-				rounded.m_x = roundThousand(rounded.m_x);
-                rounded.m_y = roundThousand(rounded.m_y);
-
-				box->setPosition(rounded);
-
-				if (isnan(box->getPosition().m_x))
-				{
-					int i = 0;
-				}
-
-				Vector2D bRight = collideRect.getBottomRight() - collideRect.getTopRight();
-				Vector2D bBottom = collideRect.getBottomLeft() - collideRect.getBottomRight();
-
-				if (dotProduct(bRight, movement) == 0.0f)
-				{
-					wallNormal = bRight;
-				}
-				else if (dotProduct(bBottom, movement) == 0.0f)
-				{
-					wallNormal = bBottom;
-				}
-				else
-				{
-					std::vector<Line> collideLines = collisionLines(boxRect, farthestPoint);
-
-					if (collideLines.size() != 0)
-					{
-						if (collideLines.size() < 2)
+						if (linesIntersect(collideLines[0], moveLine))
 						{
-							wallNormal.m_x =
-								(collideLines[0].m_end.m_x - collideLines[0].m_start.m_x);
-							wallNormal.m_y =
-								(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
+							moveAmount = intersectPoint(collideLines[0], moveLine) - moveLine.m_start;
+
+							wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
+						}
+						else
+						{
+							moveAmount = boxClosestPoints[i] - closestPointToPoint(collideLines[0], boxClosestPoints[i]);
+							wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
 						}
 					}
-				}
 
-				if (wallNormal.m_x != 0.0f ||
-					wallNormal.m_y != 0.0f)
-				{
-					Vector2D leftOverMovement = updatedPosition - box->getPosition();
-					Vector2D currentPosition = box->getPosition();
-
-					float dp = dotProduct(leftOverMovement, wallNormal);
-					Vector2D slideMove = wallNormal * (dp / (wallNormal.m_x * wallNormal.m_x + wallNormal.m_y * wallNormal.m_y));
-
-					currentPosition += slideMove;
-
-					currentPosition.m_x = roundHundred(currentPosition.m_x);
-					currentPosition.m_y = roundHundred(currentPosition.m_y);
-
-					box->setPosition(currentPosition);
-
-					if (isnan(box->getPosition().m_x))
+					if (moveAmount.m_x != 0.0f ||
+						moveAmount.m_y != 0.0f)
 					{
-						int i = 0;
+						std::vector<Line> normalCollides = collisionLines(collideRect, boxClosestPoints[i] + moveAmount);
+
+						for (unsigned int k = 0; k < normalCollides.size(); k++)
+						{
+							if (k == 1)
+							{
+								int ayy = 0;
+							}
+
+							wallNormals.push_back(normalCollides[k].m_end - normalCollides[k].m_start);
+						}
+
+						Vector2D moveExtra = moveAmount / sqrtf(powf(moveAmount.m_x, 2) + powf(moveAmount.m_y, 2));
+
+						moveExtra = moveExtra / 2.0f;
+
+						clamp(moveExtra.m_x, -1.0f, 1.0f);
+						clamp(moveExtra.m_y, -1.0f, 1.0f);
+						
+						if (5.0f <= moveAmount.m_x ||
+							5.0f <= moveAmount.m_y)
+						{
+							int what = 0;
+						}
+
+						boxRect.setCenter(boxRect.getCenter() + moveAmount + moveExtra);
+						break;
 					}
 				}
 			}
 		}
 	}
+
+	if (rectIntersectRect(boxRect, collideRect))
+	{
+		std::vector<Vector2D> collideClosePoints = getClosestPoints(collideRect, boxRect.getCenter());
+
+		if (collideClosePoints.size() != 0)
+		{
+			for (unsigned int i = 0; i < collideClosePoints.size(); i++)
+			{
+				if (pointInRect(boxRect, collideClosePoints[i]))
+				{
+					std::vector<Line> collideLines;
+
+					std::vector<Line> collidePointLines = getPointLines(collideRect, collideClosePoints[i]);
+
+					if (collidePointLines.size() != 0)
+					{
+						for (unsigned int j = 0; j < collidePointLines.size(); j++)
+						{
+							// Find the lines the lines collide with.
+							float slope = 0.0f;
+							float lengthMod = 100.0f;
+							float lineLength = totalDistance(collidePointLines[j]);
+							Line longerLine = collidePointLines[j];
+
+							if (collideClosePoints[i] == longerLine.m_end)
+							{
+								longerLine.m_end = longerLine.m_start;
+								longerLine.m_start = collidePointLines[j].m_end;
+							}
+
+							// Create a long version of the lines.
+							longerLine.m_end.m_x =
+								longerLine.m_end.m_x + (longerLine.m_end.m_x - longerLine.m_start.m_x) / lineLength * lengthMod;
+							longerLine.m_end.m_y =
+								longerLine.m_end.m_y + (longerLine.m_end.m_y - longerLine.m_start.m_y) / lineLength * lengthMod;
+
+							collisionLines(collideLines, boxRect, longerLine);
+						}
+					}
+
+					if (collideLines.size() != 0)
+					{
+						Line moveLine(collideClosePoints[i], collideClosePoints[i] - moveMod);
+
+						Vector2D moveAmount(0.0f, 0.0f);
+
+						bool collides = false;
+
+						for (unsigned int j = 0; j < collideLines.size(); j++)
+						{
+							if (linesIntersect(collideLines[j], moveLine))
+							{
+								collides = true;
+
+								break;
+							}
+						}
+
+						if (!collides)
+						{
+							moveLine.m_end = moveLine.m_start + moveMod;
+						}
+
+						if (collideLines.size() == 2)
+						{
+							if (linesIntersect(collideLines[0], moveLine))
+							{
+								if (!linesIntersect(collideLines[1], moveLine))
+								{
+									moveAmount = intersectPoint(collideLines[0], moveLine) - moveLine.m_start;
+									wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
+
+									if (5.0f <= moveAmount.m_x ||
+										5.0f <= moveAmount.m_y)
+									{
+										int what = 0;
+									}
+								}
+								else
+								{
+									float distLineA = totalDistance(intersectPoint(collideLines[0], moveLine), moveLine.m_start);
+									float distLineB = totalDistance(intersectPoint(collideLines[0], moveLine), moveLine.m_start);
+
+									if (distLineA < distLineB)
+									{
+										moveAmount = intersectPoint(collideLines[0], moveLine) - moveLine.m_start;
+										wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
+
+										if (5.0f <= moveAmount.m_x ||
+											5.0f <= moveAmount.m_y)
+										{
+											int what = 0;
+										}
+									}
+									else if (distLineA == distLineB)
+									{
+										moveAmount = intersectPoint(collideLines[0], moveLine) - moveLine.m_start;
+
+										wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
+										wallNormals.push_back(collideLines[1].m_end - collideLines[1].m_start);
+										wallNormals.push_back(collideRect.getCenter() - intersectPoint(collideLines[0], moveLine));
+
+										if (5.0f <= moveAmount.m_x ||
+											5.0f <= moveAmount.m_y)
+										{
+											int what = 0;
+										}
+									}
+									else
+									{
+										moveAmount = intersectPoint(collideLines[1], moveLine) - moveLine.m_start;
+										wallNormals.push_back(collideLines[1].m_end - collideLines[1].m_start);
+
+										if (5.0f <= moveAmount.m_x ||
+											5.0f <= moveAmount.m_y)
+										{
+											int what = 0;
+										}
+									}
+								}
+							}
+							else if (linesIntersect(collideLines[1], moveLine))
+							{
+								Vector2D intersection = intersectPoint(collideLines[1], moveLine);
+
+								moveAmount = intersectPoint(collideLines[1], moveLine) - moveLine.m_start;
+								wallNormals.push_back(collideLines[1].m_end - collideLines[1].m_start);
+
+								if (5.0f <= moveAmount.m_x ||
+									5.0f <= moveAmount.m_y)
+								{
+									int what = 0;
+								}
+							}
+							else
+							{
+								int haw = 0;
+							}
+
+							if (5.0f <= moveAmount.m_x ||
+								5.0f <= moveAmount.m_y)
+							{
+								int what = 0;
+							}
+						}
+						else
+						{
+							Vector2D closestPoint = closestPointToPoint(collideLines[0], collideClosePoints[i]);
+
+							if (totalDistance(closestPoint, collideRect.getCenter()) <
+								totalDistance(collideClosePoints[i], collideRect.getCenter()))
+							{
+								moveAmount = collideClosePoints[i] - closestPoint;
+								wallNormals.push_back(collideLines[0].m_end - collideLines[0].m_start);
+								wallNormals.push_back(collidePointLines[0].m_end - collidePointLines[0].m_start);
+								wallNormals.push_back(collidePointLines[1].m_end - collidePointLines[1].m_start);
+							}
+
+							if (5.0f <= moveAmount.m_x ||
+								5.0f <= moveAmount.m_y)
+							{
+								int what = 0;
+							}
+						}
+
+						if (moveAmount.m_x != 0.0f ||
+							moveAmount.m_y != 0.0f)
+						{
+							Vector2D moveExtra = moveAmount / sqrtf(powf(moveAmount.m_x, 2) + powf(moveAmount.m_y, 2));
+
+							moveExtra = moveExtra / 2.0f;
+
+							clamp(moveExtra.m_x, -1.0f, 1.0f);
+							clamp(moveExtra.m_y, -1.0f, 1.0f);
+
+							if (5.0f <= moveAmount.m_x ||
+								5.0f <= moveAmount.m_y)
+							{
+								int what = 0;
+							}
+
+							boxRect.setCenter(boxRect.getCenter() + moveAmount + moveExtra);
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	box->setPosition(boxRect.getCenter());
+
+	if (wallNormals.size() != 0)
+	{
+		Vector2D prevPosition = boxRect.getCenter();
+		Vector2D leftOverMovement = endGoal - prevPosition;
+
+		for (unsigned int i = 0; i < wallNormals.size(); i++)
+		{
+			float dp = dotProduct(leftOverMovement, wallNormals[i]);
+
+			Vector2D moveProposal(wallNormals[i] * (dp / (powf(wallNormals[i].m_x, 2) + powf(wallNormals[i].m_y, 2))));
+
+			if (abs(moveProposal.m_x) < 0.005f)
+			{
+				moveProposal.m_x = 0.0f;
+			}
+
+			if (abs(moveProposal.m_y) < 0.005f)
+			{
+				moveProposal.m_y = 0.0f;
+			}
+
+			if (moveProposal.m_x != 0.0f ||
+				moveProposal.m_y != 0.0f)
+			{
+				Vector2D moveModifier;
+
+				moveModifier.m_x = wallNormals[i].m_y;
+				moveModifier.m_y = -wallNormals[i].m_x;
+
+				moveModifier = moveModifier / sqrtf(powf(moveModifier.m_x, 2) + powf(moveModifier.m_y, 2));
+
+				moveModifier = moveModifier / 2.0f;
+
+				boxRect.setCenter(prevPosition + moveProposal + moveModifier);
+
+				if (!rectIntersectRect(boxRect, collideRect))
+				{
+					suggestedMoves.push_back(moveProposal);
+				}
+			}
+		}
+	}
+
+	return suggestedMoves;
 }
 
 //=============================================================================
@@ -685,12 +1235,12 @@ std::vector<Vector2D> PhysicsSystem::getClosestPoints(
 	Vector2D bottomLeft = rect.getBottomLeft();
 	Vector2D bottomRight = rect.getBottomRight();
 
-	Vector2D smallestPoint;
-	Vector2D secondSmallest;
+	Vector2D smallestPoint = topLeft;
+	Vector2D secondSmallest = topRight;
 
 	Vector2D temp[4]{ topLeft, topRight, bottomLeft, bottomRight };
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 1; i < 4; i++)
 	{
 		if (totalDistance(temp[i], point) <
 			totalDistance(smallestPoint, point))
@@ -698,7 +1248,7 @@ std::vector<Vector2D> PhysicsSystem::getClosestPoints(
 			secondSmallest = smallestPoint;
 			smallestPoint = temp[i];
 		}
-		else if(totalDistance(temp[i], point) <
+		else if (totalDistance(temp[i], point) <
 			totalDistance(secondSmallest, point))
 		{
 			secondSmallest = temp[i];
@@ -709,6 +1259,257 @@ std::vector<Vector2D> PhysicsSystem::getClosestPoints(
 	points.push_back(secondSmallest);
 
 	return points;
+}
+
+bool PhysicsSystem::boxMovingAway(const CollisionBox& box,
+	const CollisionBox& collide,
+	const Vector2D& movement)
+{
+	Rectangle boxRect = box.getBox();
+	boxRect.setCenter(boxRect.getCenter() - movement);
+
+	Rectangle collideRect = collide.getBox();
+
+	Vector2D moveMod = movement * 10000.0f;
+
+	std::vector<Vector2D> boxClosestPoints = getClosestPoints(boxRect, collideRect.getCenter());
+
+	// Check to see if any of the points are inside the collide box.
+	for (unsigned int i = 0; i < boxClosestPoints.size(); i++)
+	{
+		// If we find a point inside the collide box, find the lines it collides with.
+		if (pointInRect(collideRect, boxClosestPoints[i]))
+		{
+			std::vector<Line> collideLines;
+
+			std::vector<Line> boxPointLines = getPointLines(boxRect, boxClosestPoints[i]);
+
+			if (boxPointLines.size() != 0)
+			{
+				for (unsigned int j = 0; j < boxPointLines.size(); j++)
+				{
+					// Find the lines the lines collide with.
+					float slope = 0.0f;
+					float lengthMod = 100.0f;
+					float lineLength = totalDistance(boxPointLines[j]);
+					Line longerLine = boxPointLines[j];
+
+					if (boxClosestPoints[i] == longerLine.m_end)
+					{
+						longerLine.m_end = longerLine.m_start;
+						longerLine.m_start = boxPointLines[j].m_end;
+					}
+
+					// Create a long version of the lines.
+					longerLine.m_end.m_x =
+						longerLine.m_end.m_x + (longerLine.m_end.m_x - longerLine.m_start.m_x) / lineLength * lengthMod;
+					longerLine.m_end.m_y =
+						longerLine.m_end.m_y + (longerLine.m_end.m_y - longerLine.m_start.m_y) / lineLength * lengthMod;
+
+					collisionLines(collideLines, collideRect, longerLine);
+				}
+
+				if (collideLines.size() != 0)
+				{
+					Line moveLine(boxClosestPoints[i], boxClosestPoints[i] + moveMod);
+
+					Vector2D planeNormal(0.0f, 0.0f);
+
+					if (collideLines.size() == 2)
+					{
+						if (linesIntersect(collideLines[0], moveLine))
+						{
+							if (!linesIntersect(collideLines[1], moveLine))
+							{
+								planeNormal.m_x = -(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
+								planeNormal.m_y = collideLines[0].m_end.m_x - collideLines[0].m_start.m_x;
+							}
+							else
+							{
+								float yDistance = sqrtf(powf(moveLine.m_start.m_y - boxRect.getCenter().m_y, 2));
+								float xDistance = sqrtf(powf(moveLine.m_start.m_x - boxRect.getCenter().m_x, 2));
+
+								if (xDistance <
+									yDistance)
+								{
+									planeNormal.m_x = -(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
+									planeNormal.m_y = collideLines[0].m_end.m_x - collideLines[0].m_start.m_x;
+								}
+								else
+								{
+									planeNormal.m_x = -(collideLines[1].m_end.m_y - collideLines[1].m_start.m_y);
+									planeNormal.m_y = collideLines[1].m_end.m_x - collideLines[1].m_start.m_x;
+								}
+							}
+						}
+						else if (linesIntersect(collideLines[1], moveLine))
+						{
+							planeNormal.m_x = -(collideLines[1].m_end.m_y - collideLines[1].m_start.m_y);
+							planeNormal.m_y = collideLines[1].m_end.m_x - collideLines[1].m_start.m_x;
+						}
+					}
+					else if (collideLines.size() == 1)
+					{
+						if (linesIntersect(collideLines[0], moveLine))
+						{
+							planeNormal.m_x = -(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
+							planeNormal.m_y = collideLines[0].m_end.m_x - collideLines[0].m_start.m_x;
+						}
+					}
+
+					if (planeNormal.m_x != 0.0f ||
+						planeNormal.m_y != 0.0f)
+					{
+						Vector2D planeNormalized = planeNormal / sqrtf(powf(planeNormal.m_x, 2) + powf(planeNormal.m_y, 2));
+						Vector2D moveNormalized = movement / sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
+
+						if (dotProduct(planeNormalized, moveNormalized) < 0.0f)
+						{
+							float dp = dotProduct(planeNormalized, moveNormalized);
+							return true;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	std::vector<Vector2D> collideClosePoints = getClosestPoints(collideRect, boxRect.getCenter());
+
+	if (collideClosePoints.size() != 0)
+
+		for (unsigned int i = 0; i < collideClosePoints.size(); i++)
+		{
+			if (pointInRect(boxRect, collideClosePoints[i]))
+			{
+				std::vector<Line> collideLines;
+
+				std::vector<Line> collidePointLines = getPointLines(collideRect, collideClosePoints[i]);
+
+				if (collidePointLines.size() != 0)
+				{
+					for (unsigned int j = 0; j < collidePointLines.size(); j++)
+					{
+						// Find the lines the lines collide with.
+						float slope = 0.0f;
+						float lengthMod = 100.0f;
+						float lineLength = totalDistance(collidePointLines[j]);
+						Line longerLine = collidePointLines[j];
+
+						if (collideClosePoints[i] == longerLine.m_end)
+						{
+							longerLine.m_end = longerLine.m_start;
+							longerLine.m_start = collidePointLines[j].m_end;
+						}
+
+						// Create a long version of the lines.
+						longerLine.m_end.m_x =
+							longerLine.m_end.m_x + (longerLine.m_end.m_x - longerLine.m_start.m_x) / lineLength * lengthMod;
+						longerLine.m_end.m_y =
+							longerLine.m_end.m_y + (longerLine.m_end.m_y - longerLine.m_start.m_y) / lineLength * lengthMod;
+
+						collisionLines(collideLines, boxRect, longerLine);
+					}
+				}
+
+				if (collideLines.size() != 0)
+				{
+					Line moveLine(collideClosePoints[i], collideClosePoints[i] - moveMod);
+
+					Vector2D planeNormal(0.0f, 0.0f);
+
+					if (collideLines.size() == 2)
+					{
+						if (linesIntersect(collideLines[0], moveLine))
+						{
+							if (!linesIntersect(collideLines[1], moveLine))
+							{
+								planeNormal.m_x = -(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
+								planeNormal.m_y = collideLines[0].m_end.m_x - collideLines[0].m_start.m_x;
+							}
+							else
+							{
+								float yDistance = sqrtf(powf(moveLine.m_start.m_y - collideRect.getCenter().m_y, 2));
+								float xDistance = sqrtf(powf(moveLine.m_start.m_x - collideRect.getCenter().m_x, 2));
+
+								if (xDistance <
+									yDistance)
+								{
+									planeNormal.m_x = -(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
+									planeNormal.m_y = collideLines[0].m_end.m_x - collideLines[0].m_start.m_x;
+								}
+								else
+								{
+									planeNormal.m_x = -(collideLines[1].m_end.m_y - collideLines[1].m_start.m_y);
+									planeNormal.m_y = collideLines[1].m_end.m_x - collideLines[1].m_start.m_y;
+								}
+							}
+						}
+						else if (linesIntersect(collideLines[1], moveLine))
+						{
+							planeNormal.m_x = -(collideLines[1].m_end.m_y - collideLines[1].m_start.m_y);
+							planeNormal.m_y = collideLines[1].m_end.m_x - collideLines[1].m_start.m_x;
+						}
+					}
+					else if (collideLines.size() == 1)
+					{
+						if (linesIntersect(collideLines[0], moveLine))
+						{
+							planeNormal.m_x = -(collideLines[0].m_end.m_y - collideLines[0].m_start.m_y);
+							planeNormal.m_y = collideLines[0].m_end.m_x - collideLines[0].m_start.m_x;
+						}
+					}
+
+					if (planeNormal.m_x != 0.0f ||
+						planeNormal.m_y != 0.0f)
+					{
+						Vector2D planeNormalized = planeNormal / sqrtf(powf(planeNormal.m_x, 2) + powf(planeNormal.m_y, 2));
+						Vector2D moveNormalized = movement / sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
+
+						if (dotProduct(planeNormalized, moveNormalized) < 0.0f)
+						{
+							float dp = dotProduct(planeNormalized, moveNormalized);
+							return true;
+						}
+					}
+				}
+			}
+		}
+
+	return false;
+}
+
+std::vector<Line> PhysicsSystem::getPointLines(const Rectangle& rect,
+	const Vector2D& point)
+{
+	std::vector<Line> lines;
+
+	Line top(rect.getTopLeft(), rect.getTopRight());
+	Line right(rect.getTopRight(), rect.getBottomRight());
+	Line bottom(rect.getBottomRight(), rect.getBottomLeft());
+	Line left(rect.getBottomLeft(), rect.getTopLeft());
+
+	if (top.m_start == point || top.m_end == point)
+	{
+		lines.push_back(top);
+	}
+
+	if (right.m_start == point || right.m_end == point)
+	{
+		lines.push_back(right);
+	}
+
+	if (bottom.m_start == point || bottom.m_end == point)
+	{
+		lines.push_back(bottom);
+	}
+
+	if (left.m_start == point || left.m_end == point)
+	{
+		lines.push_back(left);
+	}
+
+	return lines;
 }
 
 //=============================================================================

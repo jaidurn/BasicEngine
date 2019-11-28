@@ -38,5 +38,6 @@ std::vector<Vector2D> collisionPoints(const Rectangle& rect,
 std::vector<Line> collisionLines(const Rectangle& rect,
 	const Vector2D& point);
 
-std::vector<Line> collisionLines(const Rectangle& rect,
+void collisionLines(std::vector<Line>& lines,
+	const Rectangle& rect,
 	const Line& line);

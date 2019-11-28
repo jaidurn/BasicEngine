@@ -2,6 +2,16 @@
 #include <cmath>
 #include "BBMath.h"
 
+bool operator==(const Line& a, const Line& b)
+{
+	if (a.m_start == b.m_start && a.m_end == b.m_end)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
 //=============================================================================
 // Function: bool linesIntersect(const Line, const Line)
 // Description:
@@ -169,7 +179,7 @@ Vector2D intersectPoint(const Line a, const Line b)
 			float intersectA = getIntercept(workingA);
 			float intersectB = getIntercept(workingB);
 
-			if (slopeA - slopeB == 0.0)
+			if (slopeA - slopeB == 0.0f)
 			{
 				if (intersectA == intersectB)
 				{
@@ -197,8 +207,38 @@ Vector2D intersectPoint(const Line a, const Line b)
 			}
 			else
 			{
-				float collideX = ((slopeA * workingA.m_start.m_x) - (slopeB * workingB.m_start.m_x) + (workingB.m_start.m_y - workingA.m_start.m_y)) / (slopeA - slopeB);
-				float collideY = (slopeA * (collideX - workingA.m_start.m_x) + workingA.m_start.m_y);
+				// Equation:
+				// slopeA * x + interceptA = slopeB * x + interceptB
+				float slopeDiff = slopeA - slopeB;
+
+				float aIntercept = getIntercept(a);
+				float bIntercept = getIntercept(b);
+
+				// Step 1:
+				// (slopeA * x + interceptA) - interceptA =
+				// (slopeB * x + interceptB) - interceptA
+				//
+				// slopeA * x = slopeB * x + interceptDiff
+				//
+				// Step 2:
+				// (slopeA * x) - slopeB * x = 
+				// (slopeB * x + interceptDiff) - slopeB * x
+				//
+				// slopeDiff * x = interceptDiff
+				//
+				// Step 3:
+				// (slopeDiff * x) / slopeDiff = 
+				// (interceptDiff) / slopeDiff
+				//
+				// x = interceptDiff / slopeDiff
+
+				float interceptDiff = bIntercept - aIntercept;
+
+				float collideX = interceptDiff / slopeDiff;
+
+				// Solve for:
+				// y = m * x + b
+				float collideY = (slopeA * collideX + aIntercept);
 
 				collideX = collideX;
 				collideY = collideY;
@@ -261,7 +301,7 @@ float getIntercept(const Line line)
 	float intercept = -1;
 	float slope = getSlope(line);
 
-	intercept = roundf(line.m_start.m_y - (line.m_start.m_x * slope));
+	intercept = line.m_start.m_y - (line.m_start.m_x * slope);
 
 	return intercept;
 }
@@ -308,15 +348,30 @@ bool pointOnLine(const Line line, const Vector2D point)
 	Line workingLine = line;
 	Vector2D workingPoint = point;
 
-	float startDistance = totalDistance(workingLine.m_start, workingPoint);
-	float endDistance = totalDistance(workingLine.m_end, workingPoint);
-
-	float realDist = totalDistance(workingLine);
-	float startAndEnd = startDistance + endDistance;
-
-	if (abs(startAndEnd - realDist) < EPSILON)
+	if ((line.m_start.m_x <= workingPoint.m_x &&
+		workingPoint.m_x <= line.m_end.m_x) ||
+		(line.m_end.m_x <= workingPoint.m_x &&
+			workingPoint.m_x <= line.m_start.m_x))
 	{
-		onLine = true;
+		if ((line.m_start.m_y <= workingPoint.m_y &&
+			workingPoint.m_y <= line.m_end.m_y) ||
+			(line.m_end.m_y <= workingPoint.m_y &&
+				workingPoint.m_y <= line.m_start.m_y))
+		{
+
+			float startDistance = totalDistance(workingLine.m_start, workingPoint);
+			float endDistance = totalDistance(workingLine.m_end, workingPoint);
+
+			float realDist = totalDistance(workingLine);
+			float startAndEnd = startDistance + endDistance;
+
+			float compareDist = abs(startAndEnd - realDist);
+
+			if (compareDist < EPSILON)
+			{
+				onLine = true;
+			}
+		}
 	}
 
 	return onLine;
@@ -378,54 +433,11 @@ float distanceFromPoint(const Line& line,
 Vector2D closestPointToPoint(const Line& line,
 	const Vector2D& point)
 {
-	float a = line.m_end.m_y - line.m_start.m_y;
-	float b = line.m_end.m_x - line.m_start.m_x;
-	float c = line.m_end.m_x * line.m_start.m_y - line.m_start.m_x * line.m_end.m_y;
+	Vector2D lineNormal = line.m_end - line.m_start;
+	Vector2D pointNormal = point - line.m_start;
+	float dp = dotProduct(pointNormal, lineNormal);
 
-	float xPoint = -1.0f;
-	float yPoint = -1.0f;
-
-	if (a == 0.0f && b != 0.0f)
-	{
-		xPoint = point.m_x;
-		yPoint = -c / b;
-	}
-	else if (a != 0.0f && b == 0.0f)
-	{
-		xPoint = -c / a;
-		yPoint = point.m_y;
-
-	}
-	else if (a != 0.0f && b != 0.0f)
-	{
-		xPoint = b * (b * point.m_x - a * point.m_y) - a * c;
-		xPoint /= (a * a) + (b * b);
-
-		yPoint = a * (-b * point.m_x + a * point.m_y) - b * c;
-		yPoint /= (a * a) + (b * b);
-	}
-
-	if (xPoint != -1.0f && yPoint != -1.0f)
-	{
-		Vector2D closestPoint(xPoint, yPoint);
-
-		if (!pointOnLine(line, closestPoint))
-		{
-			if (totalDistance(line.m_start, closestPoint) <
-				totalDistance(line.m_end, closestPoint))
-			{
-				xPoint = line.m_start.m_x;
-				yPoint = line.m_start.m_y;
-			}
-			else
-			{
-				xPoint = line.m_end.m_x;
-				yPoint = line.m_end.m_y;
-			}
-		}
-	}
-
-	return Vector2D(xPoint, yPoint);
+	return Vector2D(line.m_start + lineNormal * (dp / (powf(lineNormal.m_x, 2) + powf(lineNormal.m_y, 2))));
 }
 
 //=============================================================================
@@ -450,7 +462,7 @@ float totalDistance(const Line line)
 
 	distance = xDiff + yDiff;
 
-	return sqrt(distance);
+	return sqrtf(distance);
 }
 
 //=============================================================================

@@ -69,8 +69,8 @@ const Vector2D Rectangle::getTopLeft() const
 {
 	Vector2D topLeft;
 
-	topLeft.m_x = round(m_center.m_x - ((float)m_width / 2.0f));
-	topLeft.m_y = round(m_center.m_y - ((float)m_height / 2.0f));
+	topLeft.m_x = m_center.m_x - ((float)m_width / 2.0f);
+	topLeft.m_y = m_center.m_y - ((float)m_height / 2.0f);
 
 	if (m_rotation != 0.0f)
 	{
@@ -93,8 +93,8 @@ const Vector2D Rectangle::getTopRight() const
 {
 	Vector2D topRight;
 
-	topRight.m_x = round(m_center.m_x + ((float)m_width / 2.0f));
-	topRight.m_y = round(m_center.m_y - ((float)m_height / 2.0f));
+	topRight.m_x = m_center.m_x + ((float)m_width / 2.0f);
+	topRight.m_y = m_center.m_y - ((float)m_height / 2.0f);
 	
 	if (m_rotation != 0.0f)
 	{
@@ -117,8 +117,8 @@ const Vector2D Rectangle::getBottomLeft() const
 {
 	Vector2D bottomLeft;
 
-	bottomLeft.m_x = round(m_center.m_x - ((float)m_width / 2.0f));
-	bottomLeft.m_y = round(m_center.m_y + ((float)m_height / 2.0f));
+	bottomLeft.m_x = m_center.m_x - ((float)m_width / 2.0f);
+	bottomLeft.m_y = m_center.m_y + ((float)m_height / 2.0f);
 
 	if (m_rotation != 0.0f)
 	{
@@ -141,8 +141,8 @@ const Vector2D Rectangle::getBottomRight() const
 {
 	Vector2D bottomRight;
 
-	bottomRight.m_x = round(m_center.m_x + ((float)m_width / 2.0f));
-	bottomRight.m_y = round(m_center.m_y + ((float)m_height / 2.0f));
+	bottomRight.m_x = m_center.m_x + ((float)m_width / 2.0f);
+	bottomRight.m_y = m_center.m_y + ((float)m_height / 2.0f);
 	
 	if (m_rotation != 0.0f)
 	{

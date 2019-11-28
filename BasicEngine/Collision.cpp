@@ -30,10 +30,10 @@ bool pointInRect(const Rectangle& rect,
 	float topY = rect.getCenter().m_y - ((float)rect.getHeight() / 2.0f);
 	float bottomY = rect.getCenter().m_y + ((float)rect.getHeight() / 2.0f);
 
-	if (leftX <= rotatedPoint.m_x &&
-		rotatedPoint.m_x <= rightX &&
-		topY <= rotatedPoint.m_y &&
-		rotatedPoint.m_y <= bottomY)
+	if (leftX < rotatedPoint.m_x &&
+		rotatedPoint.m_x < rightX &&
+		topY < rotatedPoint.m_y &&
+		rotatedPoint.m_y < bottomY)
 	{
 		inside = true;
 	}
@@ -659,10 +659,7 @@ std::vector<Line> collisionLines(const Rectangle& rect,
 {
 	std::vector<Line> lines;
 
-	float workingX = roundf(point.m_x);
-	float workingY = roundf(point.m_y);
-
-	Vector2D workingPoint(workingX, workingY);
+	Vector2D workingPoint = point;
 
 	Line top(rect.getTopLeft(), rect.getTopRight());
 	Line right(rect.getTopRight(), rect.getBottomRight());
@@ -693,50 +690,105 @@ std::vector<Line> collisionLines(const Rectangle& rect,
 }
 
 //=============================================================================
-// Function: vector<Line> collisionLines(const Rectangle&,
+// Function: void collisionLines(vector<Line>&
+// const Rectangle&,
 // const Line&)
 // Description:
-// Gets a vector of all the lines in the rect the line collides with.
+// Fills a vector with all the lines in the rect 
+// that the line collides with.
+// NOTE: Doesn't allow for duplicate lines.
 // Parameters:
+// vector<Line>& lines - The vector to fill with lines.
 // const Rectangle& rect - The rect to check.
 // const Line& line - The line to check.
-// Output:
-// vector<Line>
-// Returns a vector with all the lines collided with.
-// Returns with a size of 0 if there are no collisions.
 //=============================================================================
-std::vector<Line> collisionLines(const Rectangle& rect,
+void collisionLines(std::vector<Line>& lines,
+	const Rectangle& rect,
 	const Line& line)
 {
-	std::vector<Line> lines;
-
 	if (lineInRect(rect, line))
 	{
-		Line top(rect.getTopRight(), rect.getTopLeft());
-		Line right(rect.getBottomRight(), rect.getTopRight());
-		Line bottom(rect.getBottomLeft(), rect.getBottomRight());
+		Line top(rect.getTopLeft(), rect.getTopRight());
+		Line right(rect.getTopRight(), rect.getBottomRight());
+		Line bottom(rect.getBottomRight(), rect.getBottomLeft());
 		Line left(rect.getBottomLeft(), rect.getTopLeft());
 
 		if (linesIntersect(top, line))
 		{
-			lines.push_back(top);
+			auto vit = lines.begin();
+
+			while (vit != lines.end())
+			{
+				if (*vit == top)
+				{
+					break;
+				}
+
+				vit++;
+			}
+
+			if (vit == lines.end())
+			{
+				lines.push_back(top);
+			}
 		}
 
 		if (linesIntersect(right, line))
 		{
-			lines.push_back(right);
+			auto vit = lines.begin();
+
+			while (vit != lines.end())
+			{
+				if (*vit == right)
+				{
+					break;
+				}
+
+				vit++;
+			}
+
+			if (vit == lines.end())
+			{
+				lines.push_back(right);
+			}
 		}
 
 		if (linesIntersect(bottom, line))
 		{
-			lines.push_back(bottom);
+			auto vit = lines.begin();
+
+			while (vit != lines.end())
+			{
+				if (*vit == bottom)
+				{
+					break;
+				}
+				vit++;
+			}
+
+			if (vit == lines.end())
+			{
+				lines.push_back(bottom);
+			}
 		}
 
 		if (linesIntersect(left, line))
 		{
-			lines.push_back(left);
+			auto vit = lines.begin();
+
+			while (vit != lines.end())
+			{
+				if (*vit == left)
+				{
+					break;
+				}
+				vit++;
+			}
+
+			if (vit == lines.end())
+			{
+				lines.push_back(left);
+			}
 		}
 	}
-
-	return lines;
 }
