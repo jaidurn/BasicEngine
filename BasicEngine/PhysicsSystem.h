@@ -40,10 +40,6 @@ private:
 		CollisionBox* box,
 		const Vector2D& movement);
 
-	std::vector<Vector2D> moveToCollision(CollisionBox* box,
-		CollisionBox* collision,
-		const Vector2D& movement);
-
 	std::vector<Vector2D> moveOutside(CollisionBox* box,
 		CollisionBox* collision,
 		const Vector2D& movement);
@@ -53,10 +49,6 @@ private:
 
 	std::vector<Vector2D> getClosestPoints(const Rectangle& rect,
 		const Vector2D& point) const;
-
-	bool boxMovingAway(const CollisionBox& box,
-		const CollisionBox& collide,
-		const Vector2D& movment);
 
 	std::vector<Line> getPointLines(const Rectangle& rect,
 		const Vector2D& point);

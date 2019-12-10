@@ -8,6 +8,8 @@
 #include "LogLocator.h"
 #include "Camera2D.h"
 #include "PhysicsSystem.h"
+#include "InputSystem.h"
+#include "InputDevice.h"
 
 Game::Game(const string loadPath)
 	:m_window(NULL),
@@ -15,6 +17,7 @@ Game::Game(const string loadPath)
 	m_textureCache(NULL),
 	m_renderSystem(NULL),
 	m_physicsSystem(NULL),
+	m_inputSystem(nullptr),
 	m_gameState(GAMESTATE_RUNNING)
 {
 	if (!init(loadPath))
@@ -44,159 +47,13 @@ void Game::loop()
 
 		while (SDL_PollEvent(&e))
 		{
+			m_inputSystem->update(e);
+
 			switch (e.type)
 			{
 			case SDL_QUIT:
 			{
 				m_gameState = GAMESTATE_QUIT;
-				break;
-			}
-			case SDL_KEYDOWN:
-			{
-				switch (e.key.keysym.sym)
-				{
-				case SDLK_LEFT:
-				{
-					Camera2D *camera = m_renderSystem->getCamera(0);
-
-					if (camera)
-					{
-						Vector2D newPos = camera->getPosition();
-						
-						newPos.m_x -= 4.0f;
-
-						camera->setPosition(newPos);
-					}
-					break;
-				}
-				case SDLK_RIGHT:
-				{
-					Camera2D *camera = m_renderSystem->getCamera(0);
-
-					if (camera)
-					{
-						Vector2D newPos = camera->getPosition();
-
-						newPos.m_x += 4.0f;
-
-						camera->setPosition(newPos);
-					}
-					break;
-				}
-				case SDLK_UP:
-				{
-					Camera2D *camera = m_renderSystem->getCamera(0);
-
-					if (camera)
-					{
-						Vector2D newPos = camera->getPosition();
-
-						newPos.m_y -= 4.0f;
-
-						camera->setPosition(newPos);
-					}
-					break;
-				}
-				case SDLK_DOWN:
-				{
-					Camera2D *camera = m_renderSystem->getCamera(0);
-
-					if (camera)
-					{
-						Vector2D newPos = camera->getPosition();
-
-						newPos.m_y += 4.0f;
-
-						camera->setPosition(newPos);
-					}
-					break;
-				}
-				case SDLK_KP_PLUS:
-				{
-					Camera2D *camera = m_renderSystem->getCamera(0);
-
-					if (camera)
-					{
-						camera->setCurrentScaleX(camera->getCurrentScaleX() + 0.5f);
-						camera->setCurrentScaleY(camera->getCurrentScaleY() + 0.5f);
-					}
-					break;
-				}
-				case SDLK_KP_MINUS:
-				{
-					Camera2D *camera = m_renderSystem->getCamera(0);
-
-					if (camera)
-					{
-						camera->setCurrentScaleX(camera->getCurrentScaleX() - 0.5f);
-						camera->setCurrentScaleY(camera->getCurrentScaleY() - 0.5f);
-					}
-					break;
-				}
-				case SDLK_q:
-				{
-					CollisionBox *box = m_physicsSystem->getCollisionBox(1);
-					Rectangle rect = box->getBox();
-
-					rect.setRotation(box->getBox().getRotation() - 2.0f);
-
-					box->setBox(rect);
-
-					break;
-				}
-				case SDLK_e:
-				{
-					CollisionBox *box = m_physicsSystem->getCollisionBox(1);
-					Rectangle rect = box->getBox();
-
-					rect.setRotation(box->getBox().getRotation() + 2.0f);
-
-					box->setBox(rect);
-
-					break;
-				}
-				case SDLK_w:
-				{
-					Velocity *vel = m_physicsSystem->getVelocity(1);
-
-					vel->addVelocity(Vector2D(0.0f, -1.0f));
-
-					break;
-				}
-				case SDLK_d:
-				{
-					Velocity *vel = m_physicsSystem->getVelocity(1);
-
-					vel->addVelocity(Vector2D(1.0f, 0.0f));
-
-					break;
-				}
-				case SDLK_s:
-				{
-					Velocity *vel = m_physicsSystem->getVelocity(1);
-
-					vel->addVelocity(Vector2D(0.0f, 1.0f));
-
-					break;
-				}
-				case SDLK_a:
-				{
-					Velocity *vel = m_physicsSystem->getVelocity(1);
-
-					vel->addVelocity(Vector2D(-1.0f, 0.0f));
-
-					break;
-				}
-				case SDLK_f:
-				{
-					Velocity *vel = m_physicsSystem->getVelocity(1);
-
-					vel->addVelocity(vel->getDirection() * -2.0f);
-
-					break;
-				}
-				}
-
 				break;
 			}
 			}
@@ -252,6 +109,66 @@ void Game::update(const float delta)
 {
 	if (m_gameState == GAMESTATE_RUNNING)
 	{
+		InputDevice *device = m_inputSystem->getDevice(-2);
+
+		if (device)
+		{
+			if (device->buttonPressed(BTN_ANALOG_LEFT))
+			{
+				Velocity *vel = m_physicsSystem->getVelocity(1);
+
+				vel->addVelocity(Vector2D(-1.0f, 0.0f));
+			}
+
+			if (device->buttonPressed(BTN_ANALOG_RIGHT))
+			{
+				Velocity *vel = m_physicsSystem->getVelocity(1);
+
+				vel->addVelocity(Vector2D(1.0f, 0.0f));
+			}
+
+			if (device->buttonPressed(BTN_ANALOG_UP))
+			{
+				Velocity *vel = m_physicsSystem->getVelocity(1);
+
+				vel->addVelocity(Vector2D(0.0f, -1.0f));
+			}
+
+			if (device->buttonPressed(BTN_ANALOG_DOWN))
+			{
+				Velocity *vel = m_physicsSystem->getVelocity(1);
+
+				vel->addVelocity(Vector2D(0.0f, 1.0f));
+			}
+
+			if (device->buttonPressed(BTN_BASE_ATTACK_0))
+			{
+				CollisionBox *box = m_physicsSystem->getCollisionBox(1);
+				Rectangle rect = box->getBox();
+
+				rect.setRotation(box->getBox().getRotation() - 2.0f);
+
+				box->setBox(rect);
+			}
+
+			if (device->buttonPressed(BTN_BASE_ATTACK_1))
+			{
+				CollisionBox *box = m_physicsSystem->getCollisionBox(1);
+				Rectangle rect = box->getBox();
+
+				rect.setRotation(box->getBox().getRotation() + 2.0f);
+
+				box->setBox(rect);
+			}
+
+			if (device->buttonPressed(BTN_SPECIAL_ATTACK_0))
+			{
+				Velocity *vel = m_physicsSystem->getVelocity(1);
+
+				vel->addVelocity(vel->getDirection() * -2.0f);
+			}
+		}
+
 		m_physicsSystem->update(delta);
 	}
 	else if(m_gameState == GAMESTATE_PAUSED)
@@ -307,6 +224,22 @@ bool Game::init(const string loadPath)
 				new PhysicsSystem(10,
 					10,
 					Rectangle(Vector2D((float)(width / 2), (float)(height / 2)), width, height));
+
+			m_inputSystem =
+				new InputSystem();
+
+			InputDevice* device = m_inputSystem->getDevice(-2);
+
+			if (device)
+			{
+				device->mapButton(SDLK_w, BTN_ANALOG_UP);
+				device->mapButton(SDLK_d, BTN_ANALOG_RIGHT);
+				device->mapButton(SDLK_s, BTN_ANALOG_DOWN);
+				device->mapButton(SDLK_a, BTN_ANALOG_LEFT);
+				device->mapButton(SDLK_q, BTN_BASE_ATTACK_0);
+				device->mapButton(SDLK_e, BTN_BASE_ATTACK_1);
+				device->mapButton(SDLK_f, BTN_SPECIAL_ATTACK_0);
+			}
 
 			m_renderer = ResourceManager::getRenderer();
 

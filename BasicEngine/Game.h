@@ -13,6 +13,7 @@ class Renderer;
 class TextureCache;
 class RenderSystem;
 class PhysicsSystem;
+class InputSystem;
 
 typedef std::string string;
 
@@ -37,6 +38,7 @@ private:
 	TextureCache *m_textureCache;
 	RenderSystem *m_renderSystem;
 	PhysicsSystem *m_physicsSystem;
+	InputSystem *m_inputSystem;
 
 	GameState m_gameState;
 
