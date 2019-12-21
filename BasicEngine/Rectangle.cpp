@@ -36,6 +36,11 @@ Rectangle::~Rectangle()
 
 Rectangle& Rectangle::operator=(const Rectangle& rect)
 {
+	if (&rect == this)
+	{
+		return *this;
+	}
+
 	m_center = rect.getCenter();
 	m_width = rect.m_width;
 	m_height = rect.m_height;

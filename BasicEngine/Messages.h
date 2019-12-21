@@ -8,8 +8,8 @@
 //==========================================================================================
 #include "InputDevice.h"
 #include "Vector2D.h"
+#include <SDL.h>
 
-typedef unsigned int Uint32;
 const int m_STRING_SIZE = 256;
 
 enum MessageType
@@ -18,7 +18,10 @@ enum MessageType
 	MSG_INPUT_BUTTON,
 	MSG_INPUT_MOUSE,
 	MSG_INPUT_AXIS,
-	MSG_SYS_QUIT
+	MSG_SYS_QUIT,
+	MSG_ENTITY_MOVE,
+	MSG_ENTITY_CREATE,
+	MSG_ENTITY_DESTROY
 };
 
 // Error Msg
@@ -49,13 +52,50 @@ struct InputMouseMsg
 };
 
 // System messages
-struct SystemQuit
+struct SystemQuitMsg
 {
 	char quitMsg[m_STRING_SIZE];
 };
 
+// Entity Messages
+struct EntityMoveMsg
+{
+	Vector2D oldPos;
+	Vector2D newPos;
+};
+
+struct EntityCreateMsg
+{
+	int entityType;
+	Vector2D position;
+};
+
+struct EntityDestroyMsg
+{
+	Vector2D position;
+};
+
+struct EntityMsg
+{
+	int entityID;
+
+	union
+	{
+		EntityCreateMsg create;
+		EntityDestroyMsg destroy;
+		EntityMoveMsg move;
+	};
+};
+
 struct Message
 {
+	Message(MessageType msgType)
+		:type(msgType),
+		time(SDL_GetTicks())
+	{
+
+	}
+
 	MessageType type;
 	Uint32 time;
 
@@ -67,6 +107,12 @@ struct Message
 		InputAxisMsg axis;
 		InputMouseMsg mouse;
 
-		SystemQuit quit;
+		SystemQuitMsg quit;
+
+		// Entity Messages
+		// TODO: Decide if I want to hide these in an entity msg.
+		EntityMoveMsg entityMove;
+		EntityCreateMsg entityCreate;
+		EntityDestroyMsg entityDestroy;
 	};
 };

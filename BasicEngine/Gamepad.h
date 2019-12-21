@@ -22,14 +22,11 @@ public:
 	const float getLeftTrigger() const;
 	const float getRightTrigger() const;
 
-	void setLeftX(const Sint16 leftX);
-	void setLeftY(const Sint16 leftY);
-	
-	void setRightX(const Sint16 rightX);
-	void setRightY(const Sint16 rightY);
 
-	void setLeftTrigger(const Sint16 leftTrigger);
-	void setRightTrigger(const Sint16 rightTrigger);
+	AxisCode getAxisCode(const Uint8 axis) const;
+	Vector2D getAxisValue(const AxisCode axis) const;
+	void setAxis(const Uint8 axis, 
+		const Sint16 amount);
 
 private:
 	const Sint16 m_MAX_AMOUNT = -32768;
@@ -44,5 +41,14 @@ private:
 
 	bool open(const int joystickID);
 	void close();
+
+	void setLeftX(const Sint16 leftX);
+	void setLeftY(const Sint16 leftY);
+
+	void setRightX(const Sint16 rightX);
+	void setRightY(const Sint16 rightY);
+
+	void setLeftTrigger(const Sint16 leftTrigger);
+	void setRightTrigger(const Sint16 rightTrigger);
 };
 

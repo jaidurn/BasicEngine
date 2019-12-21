@@ -10,9 +10,27 @@ CollisionBox::CollisionBox(const Rectangle& box,
 
 }
 
+CollisionBox::CollisionBox(const CollisionBox& box)
+	:m_box(box.getBox()),
+	m_solid(box.getSolid())
+{
+
+}
+
 CollisionBox::~CollisionBox()
 {
 
+}
+
+CollisionBox& CollisionBox::operator=(const CollisionBox& box)
+{
+	if (&box == this)
+	{
+		return *this;
+	}
+
+	m_box = box.m_box;
+	m_solid = box.m_solid;
 }
 
 //=============================================================================

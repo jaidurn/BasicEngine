@@ -16,10 +16,11 @@ class AnimationSet;
 class Animator
 {
 public:
-	Animator(const AnimationSet* animationSet);
+	Animator(AnimationSet* animationSet);
 	Animator(const Animator& animator);
 	~Animator();
 	
+	Animator& operator=(const Animator& animator);
 	Animator& operator++(); // Pre
 	Animator operator++(int); // Post
 
@@ -30,7 +31,7 @@ public:
 	const bool getLoop() const;
 	const bool getActive() const;
 
-	void setAnimationSet(const AnimationSet* animationSet);
+	void setAnimationSet(AnimationSet* animationSet);
 	void setAnimation(const string name);
 	void setFrame(const float frame);
 	void setSpeed(const float speed);
@@ -38,7 +39,7 @@ public:
 	void setActive(const bool active);
 
 private:
-	const AnimationSet* m_animationSet;
+	AnimationSet* m_animationSet;
 
 	string m_animation;
 	float m_currentFrame;

@@ -137,6 +137,7 @@
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="CollisionBox.cpp" />
     <ClCompile Include="ConsoleLog.cpp" />
+    <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="FileLog.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Gamepad.cpp" />
@@ -172,6 +173,8 @@
     <ClInclude Include="Collision.h" />
     <ClInclude Include="CollisionBox.h" />
     <ClInclude Include="ConsoleLog.h" />
+    <ClInclude Include="EntityData.h" />
+    <ClInclude Include="EntityManager.h" />
     <ClInclude Include="FileLog.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Gamepad.h" />

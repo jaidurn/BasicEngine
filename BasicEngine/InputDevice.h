@@ -30,6 +30,7 @@ enum ButtonCode
 
 enum AxisCode
 {
+	AXIS_ERROR = -1,
 	AXIS_LEFT,
 	AXIS_RIGHT,
 	AXIS_LEFT_TRIGGER,

@@ -6,7 +6,7 @@
 // Purpose: 
 // Handles reading and processing messages.
 //==========================================================================================
-#include "IMessage.h"
+#include "Messages.h"
 #include <deque>
 
 class MessageSystem
@@ -15,16 +15,16 @@ public:
 	MessageSystem(const int MAX_MESSAGES = 5000);
 	~MessageSystem();
 
-	bool pushMessage(IMessage *& message);
-	bool pollMessage(IMessage *& message);
+	bool pushMessage(Message *& message);
+	bool pollMessage(Message *& message);
 
 private:
-	std::deque<IMessage*> m_active;
-	std::deque<IMessage*> m_processed;
+	std::deque<Message*> m_active;
+	std::deque<Message*> m_processed;
 
 	const int m_MAX_MESSAGES;
 
 	void cleanup();
-	void processMessage(IMessage *& message);
+	void processMessage(Message *& message);
 };
 

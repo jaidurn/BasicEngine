@@ -13,7 +13,10 @@ class CollisionBox
 public:
 	CollisionBox(const Rectangle& box, 
 		const bool solid);
+	CollisionBox(const CollisionBox& box);
 	~CollisionBox();
+
+	CollisionBox& operator= (const CollisionBox& box);
 
 	const Vector2D& getPosition() const;
 	const Rectangle& getBox() const;

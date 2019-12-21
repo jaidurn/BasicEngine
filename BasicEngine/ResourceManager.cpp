@@ -192,6 +192,8 @@ void ResourceManager::setTextureCache(TextureCache *textureCache)
 //=============================================================================
 void ResourceManager::loadFromFile(const string loadPath)
 {
+	// TODO: Fix setting in and out. Remove it to it's own
+	// thread.
 	if (!m_initialized)
 	{
 		if (!m_io)

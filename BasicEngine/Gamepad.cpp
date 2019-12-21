@@ -90,6 +90,166 @@ const float Gamepad::getRightTrigger() const
 }
 
 //=============================================================================
+// Function: AxisCode getAxisCode(const Uint8) const
+// Description:
+// Converts an SDL axis into a controller axis code.
+// Parameters:
+// const Uint8 axis - The SDL Axis to convert to a code.
+//=============================================================================
+AxisCode Gamepad::getAxisCode(const Uint8 axis) const
+{
+	AxisCode axisCode = AXIS_ERROR;
+
+	if (axis == SDL_CONTROLLER_AXIS_LEFTX ||
+		axis == SDL_CONTROLLER_AXIS_LEFTY)
+	{
+		axisCode = AXIS_LEFT;
+	}
+	else if(axis == SDL_CONTROLLER_AXIS_RIGHTX ||
+		axis == SDL_CONTROLLER_AXIS_RIGHTY)
+	{
+		axisCode = AXIS_RIGHT;
+	}
+	else if (axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT)
+	{
+		axisCode = AXIS_LEFT_TRIGGER;
+	}
+	else if (axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT)
+	{
+		axisCode = AXIS_RIGHT_TRIGGER;
+	}
+
+	return axisCode;
+}
+
+//=============================================================================
+// Function: Vector2D getAxisValue(const AxisCode axis) const
+// Description:
+// Gets the value of the specified axis.
+// Parameters:
+// const AxisCode axis - The axis to get the value of.
+// Output:
+// Vector2D 
+// Returns the value of the specified axis.
+//=============================================================================
+Vector2D Gamepad::getAxisValue(const AxisCode axis) const
+{
+	switch (axis)
+	{
+	case AXIS_LEFT:
+	{
+		return getLeftStick();
+		break;
+	}
+	case AXIS_RIGHT:
+	{
+		return getRightStick();
+		break;
+	}
+	case AXIS_LEFT_TRIGGER:
+	{
+		return Vector2D(getLeftTrigger(), 0.0f);
+		break;
+	}
+	case AXIS_RIGHT_TRIGGER:
+	{
+		return Vector2D(getRightTrigger(), 0.0f);
+		break;
+	}
+	}
+
+	return Vector2D(0.0f, 0.0f);
+}
+
+//=============================================================================
+// Function: void setAxis(const Uint8, const Sint16)
+// Description:
+// Sets the movement amount for the specified axis.
+// Parameters:
+// const Uint8 axis - The axis code.
+// const Sint16 amount - The amount the axis has moved.
+//=============================================================================
+void Gamepad::setAxis(const Uint8 axis, const Sint16 amount)
+{
+	if (m_controller)
+	{
+		switch (axis)
+		{
+		case SDL_CONTROLLER_AXIS_LEFTX:
+		{
+			setLeftX(amount);
+			break;
+		}
+		case SDL_CONTROLLER_AXIS_LEFTY:
+		{
+			setLeftY(amount);
+			break;
+		}
+		case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+		{
+			setLeftTrigger(amount);
+			break;
+		}
+		case SDL_CONTROLLER_AXIS_RIGHTX:
+		{
+			setRightX(amount);
+			break;
+		}
+		case SDL_CONTROLLER_AXIS_RIGHTY:
+		{
+			setRightY(amount);
+			break;
+		}
+		case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+		{
+			setRightTrigger(amount);
+			break;
+		}
+		}
+	}
+}
+
+//=============================================================================
+// Function: bool open(const int)
+// Description:
+// Tries to open up the controller for the specified joystick device.
+// Parameters:
+// const int joystickID - The joystick to use.
+// Output:
+// bool
+// Returns true if the gamepad was opened.
+// Returns false if the gamepad failed to open.
+//=============================================================================
+bool Gamepad::open(const int joystickID)
+{
+	bool opened = false;
+
+	m_controller = SDL_GameControllerOpen(joystickID);
+
+	if (m_controller)
+	{
+		m_deviceID = SDL_JoystickGetDeviceInstanceID(joystickID);
+		opened = true;
+	}
+
+	return opened;
+}
+
+//=============================================================================
+// Function: void close()
+// Description:
+// Closes the controller if it's open.
+//=============================================================================
+void Gamepad::close()
+{
+	if (m_controller)
+	{
+		SDL_GameControllerClose(m_controller);
+		m_deviceID = -1;
+	}
+}
+
+//=============================================================================
 // Function: void setLeftX(const Sint16)
 // Description:
 // Sets the left sticks x position.
@@ -201,44 +361,4 @@ void Gamepad::setLeftTrigger(const Sint16 leftTrigger)
 void Gamepad::setRightTrigger(const Sint16 rightTrigger)
 {
 	m_rightTrigger = (float)(rightTrigger / -(m_MAX_AMOUNT + 1));
-}
-
-//=============================================================================
-// Function: bool open(const int)
-// Description:
-// Tries to open up the controller for the specified joystick device.
-// Parameters:
-// const int joystickID - The joystick to use.
-// Output:
-// bool
-// Returns true if the gamepad was opened.
-// Returns false if the gamepad failed to open.
-//=============================================================================
-bool Gamepad::open(const int joystickID)
-{
-	bool opened = false;
-
-	m_controller = SDL_GameControllerOpen(joystickID);
-
-	if (m_controller)
-	{
-		m_deviceID = SDL_JoystickGetDeviceInstanceID(joystickID);
-		opened = true;
-	}
-
-	return opened;
-}
-
-//=============================================================================
-// Function: void close()
-// Description:
-// Closes the controller if it's open.
-//=============================================================================
-void Gamepad::close()
-{
-	if (m_controller)
-	{
-		SDL_GameControllerClose(m_controller);
-		m_deviceID = -1;
-	}
 }

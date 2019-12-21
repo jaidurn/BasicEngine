@@ -20,6 +20,8 @@ public:
 		const int layer = 0);
 	~Sprite();
 
+	Sprite& operator=(const Sprite& sprite);
+
 	const Rectangle& getSize() const;
 	const Rectangle& getClip() const;
 	

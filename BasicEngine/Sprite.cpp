@@ -23,6 +23,26 @@ Sprite::~Sprite()
 	m_texture = NULL;
 }
 
+Sprite& Sprite::operator=(const Sprite& sprite)
+{
+	if (&sprite == this)
+	{
+		return *this;
+	}
+
+	m_texture = sprite.m_texture;
+	m_texture->addInstance();
+
+	m_size = sprite.m_size;
+	m_clip = sprite.m_clip;
+	m_anchor = sprite.m_anchor;
+
+	// Don't set the sprite layer. It's not allowed. 
+	// Set the sprite layer on creation only.
+
+	return *this;
+}
+
 //=============================================================================
 // Function: const Rectangle& getSize() const
 // Description:

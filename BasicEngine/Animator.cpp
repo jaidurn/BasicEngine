@@ -2,7 +2,7 @@
 #include "AnimationSet.h"
 #include "Animation.h"
 
-Animator::Animator(const AnimationSet* animationSet)
+Animator::Animator(AnimationSet* animationSet)
 	:
 	m_animationSet(animationSet),
 	m_animation(""),
@@ -33,6 +33,25 @@ Animator::Animator(const Animator& animator)
 Animator::~Animator()
 {
 	m_animationSet = NULL;
+}
+
+Animator& Animator::operator=(const Animator& animator)
+{
+	if (&animator == this)
+	{
+		return *this;
+	}
+
+	m_animationSet = animator.m_animationSet;
+	m_animationSet->addInstance();
+
+	m_animation = animator.m_animation;
+	m_currentFrame = animator.m_currentFrame;
+	m_speed = animator.m_speed;
+	m_loop = animator.m_loop;
+	m_active = animator.m_active;
+
+	return *this;
 }
 
 //=============================================================================
@@ -224,7 +243,7 @@ const bool Animator::getActive() const
 // const AnimationSet* animationSet - The animation set to use for 
 // frame information.
 //=============================================================================
-void Animator::setAnimationSet(const AnimationSet* animationSet)
+void Animator::setAnimationSet(AnimationSet* animationSet)
 {
 	if (animationSet)
 	{

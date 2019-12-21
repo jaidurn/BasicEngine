@@ -49,6 +49,15 @@
     <Filter Include="Source Files\Input">
       <UniqueIdentifier>{6a2b22f3-a504-4240-956a-dce256504a80}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Message System">
+      <UniqueIdentifier>{6fa37276-25b1-4bb0-bbff-719cf8e0285e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Message System">
+      <UniqueIdentifier>{a0d129ae-5260-410b-90b9-162ae9f4119f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Containers">
+      <UniqueIdentifier>{bfd9b061-7634-4d94-944f-3ddc7745e554}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -148,6 +157,9 @@
       <Filter>Source Files\Input</Filter>
     </ClCompile>
     <ClCompile Include="MessageSystem.cpp">
+      <Filter>Source Files\Message System</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -206,15 +218,6 @@
     <ClInclude Include="SettingIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Grid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Quadtree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Animation.h">
       <Filter>Header Files\Resources</Filter>
     </ClInclude>
@@ -248,9 +251,6 @@
     <ClInclude Include="Velocity.h">
       <Filter>Header Files\Collision</Filter>
     </ClInclude>
-    <ClInclude Include="LinkedList.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="InputDevice.h">
       <Filter>Header Files\Input</Filter>
     </ClInclude>
@@ -263,20 +263,38 @@
     <ClInclude Include="KBM.h">
       <Filter>Header Files\Input</Filter>
     </ClInclude>
-    <ClInclude Include="MessageSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="IMessage.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Message System</Filter>
     </ClInclude>
     <ClInclude Include="InputMessage.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Message System</Filter>
     </ClInclude>
     <ClInclude Include="MessageLocator.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Message System</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageSystem.h">
+      <Filter>Header Files\Message System</Filter>
     </ClInclude>
     <ClInclude Include="Messages.h">
-      <Filter>Header Files\Logging</Filter>
+      <Filter>Header Files\Message System</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>Header Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkedList.h">
+      <Filter>Header Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>Header Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="Quadtree.h">
+      <Filter>Header Files\Containers</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityData.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

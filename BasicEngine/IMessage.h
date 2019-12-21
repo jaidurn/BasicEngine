@@ -6,14 +6,14 @@
 // Purpose: 
 // An interface class for messages.
 //==========================================================================================
-enum MessageType
+enum MessageTypeOld
 {
-	MSG_ERROR = -1,
-	MSG_INPUT,
-	MSG_COLLISION,
-	MSG_MOVEMENT,
-	MSG_QUIT,
-	MSG_PAUSE
+	OMSG_ERROR = -1,
+	OMSG_INPUT,
+	OMSG_COLLISION,
+	OMSG_MOVEMENT,
+	OMSG_QUIT,
+	OMSG_PAUSE
 };
 
 class IMessage

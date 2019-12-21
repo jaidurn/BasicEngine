@@ -16,17 +16,17 @@ MessageSystem::~MessageSystem()
 }
 
 //=============================================================================
-// Function: bool pushMessage(IMessage*&)
+// Function: bool pushMessage(Message*&)
 // Description:
 // Attempts to push a message to the message queue.
 // Parameters:
-// IMessage*& message - The message to push to the queue.
+// Message*& message - The message to push to the queue.
 // Output:
 // bool
 // Success - Returns true if the message was added to the queue.
 // Failure - Returns false if the message was unable to be added to the queue.
 //=============================================================================
-bool MessageSystem::pushMessage(IMessage *& message)
+bool MessageSystem::pushMessage(Message *& message)
 {
 	bool success = false;
 
@@ -40,17 +40,17 @@ bool MessageSystem::pushMessage(IMessage *& message)
 }
 
 //=============================================================================
-// Function: bool pollMessage(IMessage *&)
+// Function: bool pollMessage(Message *&)
 // Description:
 // Polls the system for an unprocessed message.
 // Parameters:
-// IMessage *& message - The message to fill with message data.
+// Message *& message - The message to fill with message data.
 // Output:
 // bool
 // Success - Returns true when a message is accessed.
 // Failure - Returns false when a message isn't found.
 //=============================================================================
-bool MessageSystem::pollMessage(IMessage *& message)
+bool MessageSystem::pollMessage(Message *& message)
 {
 	bool success = false;
 
@@ -97,13 +97,13 @@ void MessageSystem::cleanup()
 }
 
 //=============================================================================
-// Function: void processMessage(IMessage *&)
+// Function: void processMessage(Message *&)
 // Description:
 // Adds a message to the processed message deque.
 // Parameters:
-// IMessage *& message - The message to add.
+// Message *& message - The message to add.
 //=============================================================================
-void MessageSystem::processMessage(IMessage *& message)
+void MessageSystem::processMessage(Message *& message)
 {
 	if (m_MAX_MESSAGES <= (int)m_processed.size())
 	{
