@@ -8,6 +8,7 @@
 // rotation information, and corner location.
 //==========================================================================================
 #include "Vector2D.h"
+#include "BB_fstream.h"
 
 class Rectangle
 {
@@ -50,3 +51,8 @@ private:
 	float m_rotation;
 };
 
+BB_fstream& operator<<(BB_fstream& bbstream,
+	const Rectangle& rect);
+
+BB_fstream& operator>>(BB_fstream& bbstream,
+	Rectangle& rect);

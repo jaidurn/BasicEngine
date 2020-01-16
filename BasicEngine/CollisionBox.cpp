@@ -1,6 +1,10 @@
 #include "CollisionBox.h"
 
+CollisionBox::CollisionBox()
+	:m_box(), m_solid(true)
+{
 
+}
 
 CollisionBox::CollisionBox(const Rectangle& box,
 	const bool solid)
@@ -31,6 +35,8 @@ CollisionBox& CollisionBox::operator=(const CollisionBox& box)
 
 	m_box = box.m_box;
 	m_solid = box.m_solid;
+
+	return *this;
 }
 
 //=============================================================================
@@ -107,4 +113,48 @@ void CollisionBox::setBox(const Rectangle& box)
 void CollisionBox::setSolid(const bool solid)
 {
 	m_solid = solid;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator<<(BB_fstream&,
+// const CollisionBox&)
+// Description: 
+// Reads the data from the Collision Box into the BB
+// file stream.
+// Parameters: 
+// BB_fstream& bbstream - The stream to write to.
+// const CollisionBox& box - The box to read the data from.
+// Output: 
+// BB_fstream&
+// Returns a reference to the modified BB file stream.
+//=============================================================================
+BB_fstream& operator<<(BB_fstream& bbstream,
+	const CollisionBox& box)
+{
+	bbstream << box.m_box;
+	bbstream << box.m_solid;
+
+	return bbstream;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator>>(BB_fstream&,
+// CollisionBox&)
+// Description: 
+// Reads the information from the BB file stream and 
+// writes it into the box.
+// Parameters: 
+// BB_fstream& bbstream - The stream to read from.
+// CollisionBox& box - The box to write into.
+// Output: 
+// BB_fstream&
+// Returns a reference to the modified BB file stream.
+//=============================================================================
+BB_fstream& operator>>(BB_fstream& bbstream,
+	CollisionBox& box)
+{
+	bbstream >> box.m_box;
+	bbstream >> box.m_solid;
+
+	return bbstream;
 }

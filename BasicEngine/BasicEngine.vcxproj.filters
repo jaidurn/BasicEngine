@@ -58,6 +58,12 @@
     <Filter Include="Header Files\Containers">
       <UniqueIdentifier>{bfd9b061-7634-4d94-944f-3ddc7745e554}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\IO">
+      <UniqueIdentifier>{cfd4ff0a-8031-4041-aaa3-a4dbc7ffc8a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\IO">
+      <UniqueIdentifier>{23915e2d-dec9-4e79-bbd5-c20c00e81108}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -103,9 +109,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ResourceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SettingIO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Quadtree.cpp">
@@ -162,6 +165,18 @@
     <ClCompile Include="EntityManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BB_File.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="BB_Fstream.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryIO.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingIO.cpp">
+      <Filter>Source Files\IO</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="HeaderTemplate.h">
@@ -213,9 +228,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ResourceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SettingIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Animation.h">
@@ -293,8 +305,26 @@
     <ClInclude Include="EntityManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EntityData.h">
+    <ClInclude Include="BinaryIO.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="IO.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingIO.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="LocatorIO.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="BB_File.h">
+      <Filter>Header Files\IO</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityInfo.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BB_fstream.h">
+      <Filter>Header Files\IO</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

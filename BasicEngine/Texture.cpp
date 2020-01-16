@@ -2,9 +2,11 @@
 #include <SDL.h>
 
 Texture::Texture(SDL_Texture *texture,
-	const Rectangle& bounds)
+	const Rectangle& bounds,
+	string path)
 	:m_texture(texture),
 	m_rect(bounds),
+	m_path(path),
 	m_instanceCount(0)
 {
 
@@ -82,6 +84,19 @@ const int Texture::getInstanceCount() const
 SDL_Texture* Texture::getTexture() const
 {
 	return m_texture;	
+}
+
+//=============================================================================
+// Function: string getPath() const
+// Description: 
+// Gets the path of the current texture.
+// Output: 
+// string
+// Returns the filepath to the current texture object.
+//=============================================================================
+string Texture::getPath() const
+{
+	return m_path;
 }
 
 //=============================================================================

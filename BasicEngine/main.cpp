@@ -6,6 +6,8 @@
 #include "LogLocator.h"
 #include "ConsoleLog.h"
 #include "Game.h"
+#include "BinaryIO.h"
+#include "BB_Fstream.h"
 
 int main(int argc, char *argv[])
 {
@@ -31,9 +33,9 @@ int main(int argc, char *argv[])
 
 	LogLocator::setLog(consoleLog);
 
-	Game *game = new Game("settings");
+//	Game *game = new Game("settings");
 
-	game->loop();
+//	game->loop();
 
 	delete consoleLog;
 

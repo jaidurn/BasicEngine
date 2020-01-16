@@ -20,15 +20,12 @@ public:
 	AnimationCache();
 	~AnimationCache();
 
-	const AnimationSet* getAnimationSet(const string name) const;
-
-	const bool animationSetExists(const string name) const;
-	
-	void addAnimationSet(const string name, AnimationSet* set);
+	AnimationSet* getAnimationSet(const string setPath);
 
 private:
 	std::map<string, AnimationSet*>	m_cache;
 
 	void cleanUp();
+	AnimationSet* loadSet(const string setPath);
 };
 

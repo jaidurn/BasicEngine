@@ -54,6 +54,52 @@ bool operator!=(const Vector2D& a, const Vector2D& b)
 }
 
 //=============================================================================
+// Function: BB_fstream& operator<<(BB_fstream&, const Vector2D&) 
+// Description: 
+// Reads the contents of the vector out to the BB file stream.
+// Parameters: 
+// BB_fstream& bbstream - The BB file stream to read to.
+// const Vector2D& vector - The vector to read out.
+// Output: 
+// BB_fstream&
+// Returns the modified BB_fstream.
+//=============================================================================
+BB_fstream& operator<<(BB_fstream& bbstream,
+	const Vector2D& vector)
+{
+	if (bbstream.isOpen())
+	{
+		bbstream << vector.m_x;
+		bbstream << vector.m_y;
+	}
+
+	return bbstream;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator>>(BB_fstream&, Vector2D&)
+// Description: 
+// Reads vector information in from the BB filestream.
+// Parameters: 
+// BB_fstream& bbstream - The BB file stream to read from.
+// Vector2D& vector - The vector to read into.
+// Output: 
+// BB_fstream&
+// Returns the modified file stream.
+//=============================================================================
+BB_fstream& operator>>(BB_fstream& bbstream,
+	Vector2D& vector)
+{
+	if (bbstream.isOpen())
+	{
+		bbstream >> vector.m_x;
+		bbstream >> vector.m_y;
+	}
+
+	return bbstream;
+}
+
+//=============================================================================
 // Function: const float dotProduct(const Vector2D&, const Vector2D&)
 // Description:
 // Gets the dot product of two vectors.

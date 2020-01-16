@@ -474,7 +474,7 @@ std::vector<Vector2D> PhysicsSystem::moveOutside(CollisionBox* box,
 	Rectangle collideRect = collision->getBox();
 
 	Vector2D moveNormal = movement / sqrtf(powf(movement.m_x, 2) + powf(movement.m_y, 2));
-	Vector2D moveMod = moveNormal * (boxRect.getWidth() / 2);
+	Vector2D moveMod = moveNormal * (float)(boxRect.getWidth() / 2);
 
 	Vector2D endGoal = boxRect.getCenter();
 

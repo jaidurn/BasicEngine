@@ -137,7 +137,7 @@ const Animator* RenderSystem::createAnimator(const int animatorID,
 	}
 	else
 	{
-		const AnimationSet *set = ResourceManager::getAnimationSet(animationSetName);
+		AnimationSet *set = ResourceManager::getAnimationSet(animationSetName);
 
 		if (set)
 		{

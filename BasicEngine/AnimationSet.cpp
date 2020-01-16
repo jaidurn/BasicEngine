@@ -1,7 +1,8 @@
 #include "AnimationSet.h"
 
-AnimationSet::AnimationSet()
-	:m_instanceCount(0)
+AnimationSet::AnimationSet(const string setPath)
+	:m_instanceCount(0),
+	m_path(setPath)
 {
 
 }
@@ -86,6 +87,32 @@ const int AnimationSet::getInstanceCount() const
 }
 
 //=============================================================================
+// Function: const int getAnimationCount() const
+// Description: 
+// Gets the number of animations currently in the set.
+// Output: 
+// const int
+// Returns the animation count.
+//=============================================================================
+const int AnimationSet::getAnimationCount() const
+{
+	return m_animations.size();
+}
+
+//=============================================================================
+// Function: const string getPath() const
+// Description: 
+// Gets the file path used to load the set.
+// Output: 
+// const string
+// Returns the file path used to load the set.
+//=============================================================================
+const string AnimationSet::getPath() const
+{
+	return m_path;
+}
+
+//=============================================================================
 // Function: void addAnimation(Animation *animation)
 // Description:
 // Adds an animation to the animation set.
@@ -143,4 +170,61 @@ void AnimationSet::addInstance()
 void AnimationSet::removeInstance()
 {
 	m_instanceCount--;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator<<(
+// BB_fstream&, 
+// const AnimationSet&)
+// Description: 
+// Reads the information in an animation set into the file stream.
+// Parameters: 
+// BB_fstream& bbstream - The BB file stream to read into.
+// const AnimationSet& set - The animation set to save.
+// Output: 
+// BB_fstream&
+// Returns the modified BB file stream.
+//=============================================================================
+BB_fstream& operator<<(BB_fstream& bbstream,
+	const AnimationSet& set)
+{
+	bbstream << set.getAnimationCount();
+
+	for (int i = 0; i < set.getAnimationCount(); i++)
+	{
+		bbstream << set.m_animations[i];
+	}
+
+	return bbstream;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator>>(BB_fstream&, AnimationSet&)
+// Description: 
+// Reads information from the BB stream and loads the animation
+// set and all of its animations.
+// Parameters: 
+// BB_fstream& bbstream - The BB file stream to read from.
+// AnimationSet& set - The animation set to read into.
+// Output: 
+// BB_fstream&
+// Returns the modified BB file stream.
+//=============================================================================
+BB_fstream& operator>>(BB_fstream& bbstream,
+	AnimationSet& set)
+{
+	int animationCount = 0;
+
+	bbstream >> animationCount;
+
+	for (int i = 0; i < animationCount; i++)
+	{
+		Animation* animation = new Animation("", 1.0f);
+
+		bbstream >> *animation;
+
+		set.addAnimation(animation);
+	}
+
+	return bbstream;
 }

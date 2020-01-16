@@ -10,12 +10,12 @@
 #include <string>
 #include <map>
 #include <unordered_map>
-#include "SettingIO.h"
-#include "EntityData.h"
+#include "EntityInfo.h"
 
 typedef std::string string;
 
 struct Message;
+struct BB_File;
 
 class EntityManager
 {
@@ -23,29 +23,34 @@ public:
 	EntityManager();
 	~EntityManager();
 
+	static bool loadEntityFile(const string filepath);
+
 	static bool loadEntitiesFromFile(const string filepath);
 	static void clearEntityData();
 
-	static void processMessage(const Message* message);
+//	static void processMessage(const Message* message);
 
-	static string getEntityType(const int entityID);
-	static EntityData getEntityData(const string entityType);
+//	static string getEntityType(const int entityID);
+//	static EntityData getEntityData(const string entityType);
 
-	static bool entityExists(const int entityID);
+//	static bool entityExists(const int entityID);
 
 private:
-	static std::map<string, EntityData*> m_entityData;
+	static const int m_MAX_NAME_LENGTH = 512;
+
+	static std::map<string, EntityInfo*> m_entityInfo;
 	static std::map<int, string> m_entityTypes;
 	static std::unordered_map<int, bool> m_entityFlags;
 
-	// TODO: Remove IO from this class. Make it a standalone.
-	static SettingIO m_io;
+	static BB_File* m_entityFile;
 
 	static int m_currentID;
 	static string m_currentDataPath;
 
-	static int getNextFreeID();
+//	static int getNextFreeID();
 
-	static void removeUnusedData();
+//	static void removeUnusedData();
+
+	static void loadEntityType(const string type);
 };
 

@@ -436,3 +436,60 @@ void Rectangle::setRotation(const float rotation)
 {
 	m_rotation = rotation;
 }
+
+//=============================================================================
+// Function: BB_fstream& operator<<(BB_fstream&, const Rectangle&)
+// Description: 
+// Writes the information of a rectangle out to a BB file stream.
+// Parameters: 
+// BB_fstream& bbstream - The file stream to read to.
+// const Rectangle& rect - The rect to read.
+// Output: 
+// BB_fstream&
+// Returns the modified stream.
+//=============================================================================
+BB_fstream& operator<<(BB_fstream& bbstream,
+	const Rectangle& rect)
+{
+	if (bbstream.isOpen())
+	{
+		bbstream << rect.getWidth();
+		bbstream << rect.getHeight();
+		bbstream << rect.getRotation();
+		bbstream << rect.getCenter();
+	}
+
+	return bbstream;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator>>(BB_fstream&, Rectangle&)
+// Description: 
+// Reads information from the BB file stream into the rect.
+// Parameters: 
+// BB_fstream& bbstream - The BB file stream to read from.
+// Rectangle& rect - The rectangle to read into.
+// Output: 
+// BB_fstream&
+// Returns the modified stream.
+//=============================================================================
+BB_fstream& operator>>(BB_fstream& bbstream,
+	Rectangle& rect)
+{
+	int width = 0;
+	int height = 0;
+	float rotation = 0.0f;
+	Vector2D center;
+
+	bbstream >> width;
+	bbstream >> height;
+	bbstream >> rotation;
+	bbstream >> center;
+
+	rect.setWidth(width);
+	rect.setHeight(height);
+	rect.setCenter(center);
+	rect.setRotation(rotation);
+
+	return bbstream;
+}

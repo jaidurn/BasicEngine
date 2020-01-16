@@ -33,7 +33,7 @@ TextureCache::~TextureCache()
 //=============================================================================
 Texture* TextureCache::getTexture(string texturePath)
 {
-	Texture *texture = NULL;
+	Texture *texture = nullptr;
 
 	if (texturePath != "" && m_renderer)
 	{
@@ -42,7 +42,6 @@ Texture* TextureCache::getTexture(string texturePath)
 		if (cacheIt != m_cache.end())
 		{
 			texture = cacheIt->second;
-			texture->addInstance();
 		}
 		else
 		{
@@ -64,11 +63,9 @@ Texture* TextureCache::getTexture(string texturePath)
 							surface->w,
 							surface->h);
 
-						texture = new Texture(temp, rect);
+						texture = new Texture(temp, rect, texturePath);
 
 						m_cache.insert(std::make_pair(texturePath, texture));
-
-						texture->addInstance();
 					}
 					else
 					{
@@ -124,5 +121,5 @@ void TextureCache::cleanUp()
 		}
 	}
 
-	m_renderer = NULL;
+	m_renderer = nullptr;
 }

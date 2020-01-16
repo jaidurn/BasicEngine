@@ -1,7 +1,14 @@
 #include "Sprite.h"
 #include "Texture.h"
 
-#define NULL 0
+Sprite::Sprite()
+	:m_texture(nullptr),
+	m_size(),
+	m_clip(),
+	m_layer(0)
+{
+
+}
 
 Sprite::Sprite(Texture *texture,
 	const Rectangle& size,
@@ -14,13 +21,13 @@ Sprite::Sprite(Texture *texture,
 	m_anchor(anchor),
 	m_layer(layer)
 {
-
+	m_texture->addInstance();
 }
 
 Sprite::~Sprite()
 {
 	m_texture->removeInstance();
-	m_texture = NULL;
+	m_texture = nullptr;
 }
 
 Sprite& Sprite::operator=(const Sprite& sprite)
@@ -213,6 +220,29 @@ void Sprite::setTexture(Texture *texture)
 }
 
 //=============================================================================
+// Function: void setSize(const Rectangle&)
+// Description: 
+// Sets the sprite size to the new size and makes sure the clip
+// isn't larger than the size of the sprite.
+// Parameters: 
+// const Rectangle& size - The new size of the sprite.
+//=============================================================================
+void Sprite::setSize(const Rectangle& size)
+{
+	m_size = size;
+
+	if (m_size.getWidth() < m_clip.getWidth())
+	{
+		m_clip.setWidth(m_size.getWidth());
+	}
+
+	if (m_size.getHeight() < m_clip.getHeight())
+	{
+		m_clip.setHeight(m_size.getHeight());
+	}
+}
+
+//=============================================================================
 // Function: void setClip(const Rectangle&)
 // Description:
 // Sets the new clip to use for the sprite.
@@ -234,4 +264,65 @@ void Sprite::setClip(const Rectangle& clip)
 void Sprite::setLayer(const int layer)
 {
 	m_layer = layer;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator<<(BB_fstream&, const Sprite&)
+// Description: 
+// Reads the sprite information into the file stream. 
+// NOTE: THIS DOESN'T SAVE ANY TEXTURE INFORMATION.
+// Parameters: 
+// BB_fstream& bbstream - The file stream to read into.
+// const Sprite& sprite - The sprite to save the information of.
+// Output: 
+// BB_fstream&
+// Returns the modified file stream.
+//=============================================================================
+BB_fstream& operator<<(BB_fstream& bbstream,
+	const Sprite& sprite)
+{
+	if (sprite.getTexture())
+	{
+		bbstream << sprite.getTexture()->getPath();
+	}
+
+	bbstream << sprite.getSize();
+	bbstream << sprite.getClip();
+	bbstream << sprite.getAnchor();
+	bbstream << sprite.getLayer();
+
+	return bbstream;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator>>(BB_fstream&, Sprite&)
+// Description: 
+// Reads information for the sprite in from the file stream.
+// NOTE: THIS DOESN'T LOAD/MODIFY TEXTURE DATA.
+// Parameters: 
+// BB_fstream& bbstream - The file stream to read from.
+// Sprite& sprite - The sprite to read into.
+// Output: 
+// BB_fstream&
+// Returns the modified file stream.
+//=============================================================================
+BB_fstream& operator>>(BB_fstream& bbstream,
+	Sprite& sprite)
+{
+	Rectangle size;
+	Rectangle clip;
+	Vector2D anchor;
+	int layer = 0;
+
+	bbstream >> size;
+	bbstream >> clip;
+	bbstream >> anchor;
+	bbstream >> layer;
+
+	sprite.setSize(size);
+	sprite.setClip(clip);
+	sprite.setAnchor(anchor);
+	sprite.setLayer(layer);
+
+	return bbstream;
 }

@@ -11,13 +11,15 @@
 class AnimationSet
 {
 public:
-	AnimationSet();
+	AnimationSet(const string setPath);
 	~AnimationSet();
 
 	Animation* getAnimation(const string name) const;
 	const Rectangle* getFrame(const string name,
 							  const int index) const;
 	const int getInstanceCount() const;
+	const int getAnimationCount() const;
+	const string getPath() const;
 
 	void addAnimation(Animation *animation);
 
@@ -26,8 +28,14 @@ public:
 	void addInstance();
 	void removeInstance();
 
+	friend BB_fstream& operator<<(BB_fstream& bbstream,
+		const AnimationSet& set);
+
+	friend BB_fstream& operator>>(BB_fstream& bbstream,
+		AnimationSet& set);
+
 private:
 	std::vector<Animation*> m_animations;
 	int m_instanceCount;
+	string m_path;
 };
-

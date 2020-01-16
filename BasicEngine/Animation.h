@@ -10,6 +10,8 @@
 #include <vector>
 #include <string>
 
+#include "BB_fstream.h"
+
 typedef std::string string;
 
 class Animation
@@ -26,6 +28,8 @@ public:
 	const int getFrameCount() const;
 
 	void addFrame(const Rectangle& frame);
+	void setSpeed(const float speed);
+	void setName(const string name);
 
 private:
 	string m_name;
@@ -34,3 +38,5 @@ private:
 	std::vector<Rectangle> m_frames;
 };
 
+BB_fstream& operator<<(BB_fstream& bbstream, const Animation& animation);
+BB_fstream& operator>>(BB_fstream& bbstream, Animation& animation);

@@ -79,42 +79,20 @@ Texture* ResourceManager::getTexture(string texturePath)
 // Description:
 // Gets the animation set from the animation cache if it exists.
 // Parameters:
-// const string name - The unique identifier of the animation 
-// to get.
+// const string setPath - The file path for the set to get.
 // Output:
 // const AnimationSet*
 // On success - Returns a pointer to an animation set object.
 // On failure - Returns NULL.
 //=============================================================================
-const AnimationSet* ResourceManager::getAnimationSet(const string name)
+AnimationSet* ResourceManager::getAnimationSet(const string setPath)
 {
 	if (m_animationCache)
 	{
-		return m_animationCache->getAnimationSet(name);
+		return m_animationCache->getAnimationSet(setPath);
 	}
 
 	return NULL;
-}
-
-//=============================================================================
-// Function: void addAnimationSet(const string, AnimationSet*)
-// Description:
-// Adds an animation set to the animation cache.
-// Parameters:
-// const string name - The unique identifier of the animation set.
-// AnimationSet* set - The set to add.
-//=============================================================================
-void ResourceManager::addAnimationSet(const string name,
-	AnimationSet* set)
-{
-	if (m_animationCache)
-	{
-		m_animationCache->addAnimationSet(name, set);
-	}
-	else
-	{
-
-	}
 }
 
 //=============================================================================

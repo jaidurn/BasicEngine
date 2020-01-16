@@ -96,3 +96,104 @@ void Animation::addFrame(const Rectangle& frame)
 {
 	m_frames.push_back(frame);
 }
+
+//=============================================================================
+// Function: void setSpeed(const float)
+// Description: 
+// Sets the base speed for the animation.
+// Parameters: 
+// const float speed - The new speed to use for the animation.
+//=============================================================================
+void Animation::setSpeed(const float speed)
+{
+	m_speed = speed;
+}
+
+//=============================================================================
+// Function: void setName(const string)
+// Description: 
+// Sets the name of the animation.
+// Parameters: 
+// const string name - The name to use for the animiation.
+//=============================================================================
+void Animation::setName(const string name)
+{
+	if (name != "")
+	{
+		m_name = name;
+	}
+}
+
+//=============================================================================
+// Function: BB_fstream& operator<<(BB_fstream&, const Animation&)
+// Description: 
+// Reads animation information out to a bb stream.
+// Parameters: 
+// BB_fstream& bbstream - The stream to read.
+// const Animation& animation - The animation to read out.
+// Output: 
+// BB_fstream&
+// Returns the modified BB_fstream.
+//=============================================================================
+BB_fstream& operator<<(BB_fstream& bbstream, 
+	const Animation& animation)
+{
+	if (bbstream.isOpen())
+	{
+		
+		bbstream << animation.getFrameCount();
+		bbstream << animation.getSpeed();
+
+		for (int i = 0; i < animation.getFrameCount(); i++)
+		{
+			Rectangle rect = animation[i];
+
+			bbstream << rect;
+		}
+
+		bbstream << animation.getName();
+	}
+
+	return bbstream;
+}
+
+//=============================================================================
+// Function: BB_fstream& operator>>(BB_fstream&, Animation&) 
+// Description: 
+// Reads information from the BB stream into the animation 
+// object.
+// Parameters: 
+// BB_fstream& bbstream - The BB file stream to read from.
+// Animation& animation - The animation to read into.
+// Output: 
+// BB_fstream&
+// Returns the modified file stream.
+//=============================================================================
+BB_fstream& operator>>(BB_fstream& bbstream,
+	Animation& animation)
+{
+	int frameCount = 0;
+	float speed = 1.0f;
+
+	bbstream >> frameCount;
+	bbstream >> speed;
+
+	animation.setSpeed(speed);
+
+	for (int i = 0; i < frameCount; i++)
+	{
+		Rectangle rect;
+
+		bbstream >> rect;
+
+		animation.addFrame(rect);
+	}
+
+	string name = "";
+
+	bbstream >> name;
+
+	animation.setName(name);
+
+	return bbstream;
+}

@@ -14,7 +14,8 @@ class Texture
 {
 public:
 	Texture(SDL_Texture *texture,
-			const Rectangle& bounds);
+			const Rectangle& bounds, 
+			string path);
 	~Texture();
 
 	const Rectangle& getRect() const;
@@ -23,6 +24,7 @@ public:
 	const int getInstanceCount() const;
 
 	SDL_Texture* getTexture() const;
+	string getPath() const;
 
 	void addInstance();
 	void removeInstance();
@@ -30,6 +32,7 @@ public:
 private:
 	SDL_Texture *m_texture;
 	Rectangle m_rect;
+	string m_path;
 
 	int m_instanceCount;
 };

@@ -6,6 +6,7 @@
 // Purpose: 
 // Allows for storage of x and y coordinates.
 //==========================================================================================
+#include "BB_fstream.h"
 
 struct Vector2D
 {
@@ -67,5 +68,11 @@ Vector2D operator/(const Vector2D& point, const float amount);
 
 bool operator==(const Vector2D& a, const Vector2D& b);
 bool operator!=(const Vector2D& a, const Vector2D& b);
+
+BB_fstream& operator<<(BB_fstream& bbstream,
+	const Vector2D& vector);
+
+BB_fstream& operator>>(BB_fstream& bbstream,
+	Vector2D& vector);
 
 const float dotProduct(const Vector2D& a, const Vector2D& b);

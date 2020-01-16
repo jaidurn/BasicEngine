@@ -7,12 +7,14 @@
 // Holds information for the sprites.
 //==========================================================================================
 #include "Rectangle.h"
+#include "BB_fstream.h"
 
 class Texture;
 
 class Sprite
 {
 public:
+	Sprite();
 	Sprite(Texture* texture,
 		const Rectangle& size,
 		const Rectangle& clip,
@@ -44,6 +46,7 @@ public:
 	
 	void setTexture(Texture* texture);
 	
+	void setSize(const Rectangle& size);
 	void setClip(const Rectangle& clip);
 
 	void setLayer(const int layer);
@@ -59,3 +62,8 @@ private:
 	int m_layer;
 };
 
+BB_fstream& operator<<(BB_fstream& bbstream,
+	const Sprite& sprite);
+
+BB_fstream& operator>>(BB_fstream& bbstream,
+	Sprite& sprite);

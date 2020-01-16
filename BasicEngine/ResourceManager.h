@@ -28,8 +28,7 @@ public:
 	static Renderer* getRenderer();
 
 	static Texture* getTexture(const string texturePath);
-	static const AnimationSet* getAnimationSet(const string name);
-	static void addAnimationSet(const string name, AnimationSet* set);
+	static AnimationSet* getAnimationSet(const string name);
 
 	static void setWindow(Window *window);
 	static void setRenderer(Renderer *renderer);

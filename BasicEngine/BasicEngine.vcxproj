@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>B:\SDL2\include;$(IncludePath)</IncludePath>
-    <LibraryPath>B:\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\SDL2\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\SDL2\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>B:\SDL2\include;$(IncludePath)</IncludePath>
@@ -85,7 +85,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>SDL2main.lib;SDL2.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -133,6 +133,9 @@
     <ClCompile Include="Animator.cpp" />
     <ClCompile Include="AnimationSet.cpp" />
     <ClCompile Include="BBMath.cpp" />
+    <ClCompile Include="BB_File.cpp" />
+    <ClCompile Include="BB_Fstream.cpp" />
+    <ClCompile Include="BinaryIO.cpp" />
     <ClCompile Include="Camera2D.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="CollisionBox.cpp" />
@@ -169,11 +172,14 @@
     <ClInclude Include="Animator.h" />
     <ClInclude Include="AnimationSet.h" />
     <ClInclude Include="BBMath.h" />
+    <ClInclude Include="BB_File.h" />
+    <ClInclude Include="BB_fstream.h" />
+    <ClInclude Include="BinaryIO.h" />
     <ClInclude Include="Camera2D.h" />
     <ClInclude Include="Collision.h" />
     <ClInclude Include="CollisionBox.h" />
     <ClInclude Include="ConsoleLog.h" />
-    <ClInclude Include="EntityData.h" />
+    <ClInclude Include="EntityInfo.h" />
     <ClInclude Include="EntityManager.h" />
     <ClInclude Include="FileLog.h" />
     <ClInclude Include="Game.h" />
@@ -184,6 +190,7 @@
     <ClInclude Include="InputDevice.h" />
     <ClInclude Include="InputMessage.h" />
     <ClInclude Include="InputSystem.h" />
+    <ClInclude Include="IO.h" />
     <ClInclude Include="KBM.h" />
     <ClInclude Include="Line.h" />
     <ClInclude Include="LinkedList.h" />
@@ -202,6 +209,7 @@
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Rotation.h" />
     <ClInclude Include="SettingIO.h" />
+    <ClInclude Include="LocatorIO.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureCache.h" />
